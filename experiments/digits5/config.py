@@ -67,7 +67,7 @@ args = parse_args()
 if socket.gethostname() == 'mtec-mis-502':
     args.data_dir = '/mnt/wave/odin/digitfive/'
     args.save_dir = '/local/home/evanweenen/gdu4dg-pytorch/results/digits5/'
-elif socket.gethostname() == 'mtec-im-gpu01' and os.getusername() == 'evanweenen':
+elif socket.gethostname() == 'mtec-im-gpu01' and os.getlogin() == 'evanweenen':
     args.data_dir = '/wave/odin/digitfive/'
     args.save_dir = '/local/home/evanweenen/gdu4dg-pytorch/results/digits5/'
 else:
