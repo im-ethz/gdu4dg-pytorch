@@ -2,7 +2,6 @@ import torch
 from torch.utils.data import Dataset
 from torchvision.transforms import Normalize
 import numpy as np
-from tqdm import tqdm
 
 class DigitFiveDataset(Dataset):
     def __init__(self, image, label):

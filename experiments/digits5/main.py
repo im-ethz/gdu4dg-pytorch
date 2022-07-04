@@ -3,9 +3,12 @@ import numpy as np
 
 from sklearn.model_selection import ParameterGrid
 from torch.utils.data import DataLoader
+from torch import nn
 import traceback
+import copy
+from tqdm import tqdm
 
-from config import args
+from config import args, init_gpu
 from data import DigitFiveDataset
 from read import load_digit5
 
@@ -21,7 +24,6 @@ def digits_classification(data_dir,
                           lr = 0.001,
                           activation = 'tanh',
                           dropout = 0.5,
-                          optimizer = 'Adam',
                           epochs = 100,
                           patience = 10,
                           early_stopping = True,
@@ -40,7 +42,7 @@ def digits_classification(data_dir,
                           save_feature = False,
                           **kwargs):
 
-    # read data
+    # -------------------------- read data
     SOURCE_DOMAINS = ('mnist', 'mnistm', 'svhn', 'syn', 'usps')
 
     data = {s:load_digit5(s, data_dir, SOURCE_SAMPLE_SIZE, TARGET_SAMPLE_SIZE) for s in SOURCE_DOMAINS}
@@ -62,12 +64,79 @@ def digits_classification(data_dir,
     source_test_loader = DataLoader(data_source_test, batch_size=batch_size, shuffle=True)
     target_test_loader = DataLoader(data_target_test, batch_size=batch_size, shuffle=True)
 
+    # -------------------------- model
+    device = init_gpu(0)
     ####################################
     # TODO Andras: insert model layer here
 
     # model = ....
+    # TODO: check if last layer is softmax and whether loss function should be with or without logits
     ####################################
 
+    model = nn.DataParallel(model).to(device)
+    optimiser = torch.optim.Adam(model.parameters(), lr=lr)
+    criterion = nn.CrossEntropyLoss()
+
+    # -------------------------- train
+    min_loss = np.inf
+    best_model = None
+    logs = {split: [] for split in ('source_train', 'source_test', 'target_test')}
+
+    # TODO: in tensorflow code it seems like they only train for one epoch in the beginning
+    for e in tqdm(range(epochs)):
+
+        batch_logs = {split: [] for split in ('source_train', 'source_test', 'target_test')}
+
+        # training
+        model.train()
+        for inputs, target in source_train_loader:
+            inputs, target = inputs.to(device), target.to(device)
+
+            optimiser.zero_grad()
+
+            output = model(inputs)
+            loss = criterion(output, target)
+
+            batch_logs['source_train'].append(loss.item())
+
+            loss.backward()
+            optimiser.step()
+
+        optimiser.zero_grad()
+
+        # validation
+        model.eval()
+        with torch.no_grad():
+            for inputs, target in source_test_loader:
+                inputs, target = inputs.to(device), target.to(device)
+
+                output = model(inputs)
+                loss = criterion(output, target)
+
+                batch_logs['source_test'].append(loss.item())
+
+            for inputs, target in target_test_loader:
+                inputs, target = inputs.to(device), target.to(device)
+
+                output = model(inputs)
+                loss = criterion(output, target)
+
+                batch_logs['target_test'].append(loss.item())
+
+        # early stopping
+        for split in logs.keys():
+            logs[split].append(np.mean(batch_logs[split]))
+
+        if logs['source_test'][-1] < min_loss:
+            min_loss = logs['source_test'][-1]
+            best_model = copy.deepcopy(model)
+
+        elif np.array(logs['source_test'][-patience:] > min_loss).sum() == patience:
+            print("Early stopping!")
+            break
+
+    # -------------------------- fine-tune
+    # TODO if fine_tune:
 
 
 if __name__ == '__main__':

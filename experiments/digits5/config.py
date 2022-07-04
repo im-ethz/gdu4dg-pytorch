@@ -2,6 +2,7 @@
 import argparse
 import socket
 import os
+import torch
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Digits 5 classification')
@@ -77,3 +78,19 @@ args.save_dir += f"{args.TARGET_DOMAIN}_{args.similarity}_{'ft' if args.fine_tun
 
 if not os.path.exists(args.save_dir):
     os.makedirs(args.save_dir)
+
+def init_gpu(gpu):
+    """
+    Initialises a GPU for pytorch experiments
+    """
+    if torch.cuda.is_available() and gpu is not None:
+        os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+        os.environ["CUDA_VISIBLE_DEVICES"]=gpu
+
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+
+    print("Using device: " + torch.cuda.get_device_name(device))
+
+    return device
