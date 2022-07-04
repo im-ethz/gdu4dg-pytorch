@@ -1,7 +1,10 @@
 import os
+import torch
 import numpy as np
 
 from scipy.io import loadmat
+import torch.nn.functional as F
+from torchvision.transforms import Resize
 
 def load_mnist(data_dir):
     data = loadmat(os.path.join(data_dir, "mnist_data.mat"))
@@ -102,6 +105,17 @@ def resample(data, train_size=25000, test_size=9000):
 
     return data
 
+def transform(data, img_shape=32):
+    # resize image
+    data['train']['image'] = Resize(img_shape)(torch.tensor(np.uint8(data['train']['image'])))
+    data['test']['image'] = Resize(img_shape)(torch.tensor(np.uint8(data['test']['image'])))
+
+    # onehot encode labels
+    data['train']['label'] = F.one_hot(torch.tensor(data['train']['label'], dtype=torch.int64), num_classes=10)
+    data['test']['label'] = F.one_hot(torch.tensor(data['test']['label'], dtype=torch.int64), num_classes=10)
+
+    return data
+
 def load_digit5(domain, data_dir, train_size, test_size):
     if domain == "mnist":
         data = load_mnist(data_dir)
@@ -117,5 +131,7 @@ def load_digit5(domain, data_dir, train_size, test_size):
         raise NotImplementedError("Domain {} Not Implemented".format(domain))
 
     data = resample(data, train_size, test_size)
+
+    data = transform(data)
 
     return data
