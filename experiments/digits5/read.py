@@ -107,8 +107,8 @@ def resample(data, train_size=25000, test_size=9000):
 
 def transform(data, img_shape=32):
     # resize image
-    data['train']['image'] = Resize(img_shape)(torch.tensor(np.uint8(data['train']['image'])))
-    data['test']['image'] = Resize(img_shape)(torch.tensor(np.uint8(data['test']['image'])))
+    data['train']['image'] = Resize(img_shape)(torch.tensor(np.uint8(data['train']['image'])))/255
+    data['test']['image'] = Resize(img_shape)(torch.tensor(np.uint8(data['test']['image'])))/255
 
     # onehot encode labels
     data['train']['label'] = F.one_hot(torch.tensor(data['train']['label'], dtype=torch.int64), num_classes=10)

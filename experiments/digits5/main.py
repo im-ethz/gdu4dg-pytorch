@@ -1,14 +1,16 @@
-import traceback
+import torch
+import numpy as np
 
 from sklearn.model_selection import ParameterGrid
-
 from torch.utils.data import DataLoader
+import traceback
 
 from config import args
 from data import DigitFiveDataset
 from read import load_digit5
 
-def digits_classification(TARGET_DOMAIN, data_dir,
+def digits_classification(data_dir,
+                          TARGET_DOMAIN,
                           SOURCE_SAMPLE_SIZE,
                           TARGET_SAMPLE_SIZE,
                           similarity,
@@ -39,16 +41,33 @@ def digits_classification(TARGET_DOMAIN, data_dir,
                           **kwargs):
 
     # read data
-    data = load_digit5(TARGET_DOMAIN, data_dir, SOURCE_SAMPLE_SIZE, TARGET_SAMPLE_SIZE)
-
-    data_train = DigitFiveDataset(data, 'train')
-    data_test = DigitFiveDataset(data, 'test')
-
-    train_loader = DataLoader(data_train, batch_size=int(1e10), shuffle=True)
-    test_loader = DataLoader(data_test, batch_size=int(1e10), shuffle=True)
-
-    # reg method is SRIP if similarity = projected, else none
     SOURCE_DOMAINS = ('mnist', 'mnistm', 'svhn', 'syn', 'usps')
+
+    data = {s:load_digit5(s, data_dir, SOURCE_SAMPLE_SIZE, TARGET_SAMPLE_SIZE) for s in SOURCE_DOMAINS}
+
+    x_source_train = torch.cat([data[s]['train']['image'] for s in data.keys() if s.lower() != TARGET_DOMAIN.lower()], axis=0)
+    y_source_train = torch.cat([data[s]['train']['label'] for s in data.keys() if s.lower() != TARGET_DOMAIN.lower()], axis=0)
+
+    x_source_test = torch.cat([data[s]['test']['image'] for s in data.keys() if s.lower() != TARGET_DOMAIN.lower()], axis=0)
+    y_source_test = torch.cat([data[s]['test']['label'] for s in data.keys() if s.lower() != TARGET_DOMAIN.lower()], axis=0)
+
+    x_target_test = data[TARGET_DOMAIN]['test']['image']
+    y_target_test = data[TARGET_DOMAIN]['test']['label']
+
+    data_source_train = DigitFiveDataset(x_source_train, y_source_train)
+    data_source_test = DigitFiveDataset(x_source_test, y_source_test)
+    data_target_test = DigitFiveDataset(x_target_test, y_target_test)
+
+    source_train_loader = DataLoader(data_source_train, batch_size=batch_size, shuffle=True)
+    source_test_loader = DataLoader(data_source_test, batch_size=batch_size, shuffle=True)
+    target_test_loader = DataLoader(data_target_test, batch_size=batch_size, shuffle=True)
+
+    ####################################
+    # TODO Andras: insert model layer here
+
+    # model = ....
+    ####################################
+
 
 
 if __name__ == '__main__':
