@@ -57,8 +57,8 @@ def parse_args():
                         default=5)
 
     args = parser.parse_args()
-    if args.method == 'None':
-        args.method = None
+    if args.similarity == 'None':
+        args.similarity = None
     return args
 
 args = parse_args()
