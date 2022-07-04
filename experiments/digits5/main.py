@@ -136,7 +136,7 @@ def digits_classification(data_dir,
             break
 
     # -------------------------- fine-tune
-    # TODO if fine_tune:
+    # TODO if fine_tune and similarity == None:
 
 
 if __name__ == '__main__':
