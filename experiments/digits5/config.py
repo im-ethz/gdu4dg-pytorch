@@ -4,6 +4,7 @@ import socket
 import os
 import torch
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Digits 5 classification')
     parser.add_argument('--run_all',
@@ -14,7 +15,7 @@ def parse_args():
     parser.add_argument('--similarity',
                         help='cosine_similarity, MMD, projected',
                         type=str,
-                        default='cosine_similarity')
+                        default='CS')
 
     parser.add_argument('--TARGET_DOMAIN',
                         help='mnistm, mnist, syn, svhn, usps',
@@ -62,15 +63,16 @@ def parse_args():
         args.similarity = None
     return args
 
+
 args = parse_args()
 
 # define save dir
 if socket.gethostname() == 'mtec-mis-502':
     args.data_dir = '/mnt/wave/odin/digitfive/'
     args.save_dir = '/local/home/evanweenen/gdu4dg-pytorch/results/digits5/'
-elif socket.gethostname() == 'mtec-im-gpu01' and os.getlogin() == 'evanweenen':
+elif socket.gethostname() == 'mtec-im-gpu01' and os.getlogin() == 'ansass':
     args.data_dir = '/wave/odin/digitfive/'
-    args.save_dir = '/local/home/evanweenen/gdu4dg-pytorch/results/digits5/'
+    args.save_dir = '/local/home/ansass/Thesis/layer/results/digits5/'
 else:
     print("You are running the code on an undefined machine. Please add your machine and data paths to config.py")
 
@@ -78,6 +80,7 @@ args.save_dir += f"{args.TARGET_DOMAIN}_{args.similarity}_{'ft' if args.fine_tun
 
 if not os.path.exists(args.save_dir):
     os.makedirs(args.save_dir)
+
 
 def init_gpu(gpu):
     """

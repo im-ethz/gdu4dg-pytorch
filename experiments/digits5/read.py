@@ -6,6 +6,7 @@ from scipy.io import loadmat
 import torch.nn.functional as F
 from torchvision.transforms import Resize
 
+
 def load_mnist(data_dir):
     data = loadmat(os.path.join(data_dir, "mnist_data.mat"))
     train_image = np.reshape(data['train_32'], (55000, 32, 32, 1))
@@ -23,6 +24,7 @@ def load_mnist(data_dir):
 
     return {'train': {'image': train_image, 'label': train_label}, 'test': {'image': test_image, 'label': test_label}}
 
+
 def load_mnist_m(data_dir):
     data = loadmat(os.path.join(data_dir, "mnistm_with_label.mat"))
     train_image = data['train']
@@ -35,6 +37,7 @@ def load_mnist_m(data_dir):
     test_label = np.argmax(data['label_test'], axis=1)
 
     return {'train': {'image': train_image, 'label': train_label}, 'test': {'image': test_image, 'label': test_label}}
+
 
 def load_svhn(data_dir):
     train_data = loadmat(os.path.join(data_dir, "svhn_train_32x32.mat"))
@@ -53,6 +56,7 @@ def load_svhn(data_dir):
 
     return {'train': {'image': train_image, 'label': train_label}, 'test': {'image': test_image, 'label': test_label}}
 
+
 def load_syn(data_dir):
     # note: in tensorflow implementation, this dataset did not undergo permutation
     train_data = loadmat(os.path.join(data_dir, "synth_train_32x32.mat"))
@@ -70,6 +74,7 @@ def load_syn(data_dir):
     test_label[test_label == 10] = 0
 
     return {'train': {'image': train_image, 'label': train_label}, 'test': {'image': test_image, 'label': test_label}}
+
 
 def load_usps(data_dir):
     data = loadmat(os.path.join(data_dir, "usps_28x28.mat"))["dataset"]
@@ -92,6 +97,7 @@ def load_usps(data_dir):
 
     return {'train': {'image': train_image, 'label': train_label}, 'test': {'image': test_image, 'label': test_label}}
 
+
 def resample(data, train_size=25000, test_size=9000):
     # random sample 25000 from train dataset and random sample 9000 from test dataset
     inds = np.random.permutation(data['train']['image'].shape[0])
@@ -105,16 +111,18 @@ def resample(data, train_size=25000, test_size=9000):
 
     return data
 
+
 def transform(data, img_shape=32):
     # resize image
     data['train']['image'] = Resize(img_shape)(torch.tensor(np.uint8(data['train']['image'])))/255
     data['test']['image'] = Resize(img_shape)(torch.tensor(np.uint8(data['test']['image'])))/255
 
     # onehot encode labels
-    data['train']['label'] = F.one_hot(torch.tensor(data['train']['label'], dtype=torch.int64), num_classes=10)
-    data['test']['label'] = F.one_hot(torch.tensor(data['test']['label'], dtype=torch.int64), num_classes=10)
+    data['train']['label'] = F.one_hot(torch.tensor(data['train']['label'], dtype=torch.int64), num_classes=10).to(torch.float32)
+    data['test']['label'] = F.one_hot(torch.tensor(data['test']['label'], dtype=torch.int64), num_classes=10).to(torch.float32)
 
     return data
+
 
 def load_digit5(domain, data_dir, train_size, test_size):
     if domain == "mnist":
