@@ -20,8 +20,22 @@ from gdu_pytorch.loss import LayerLoss
 import torchvision.transforms as transforms
 from wilds import get_dataset
 from wilds.common.data_loaders import get_train_loader
-from torchvision import models
+import torchvision
+#from torchvision import models
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class Identity(nn.Module):
+    """An identity layer"""
+    def __init__(self, d):
+        super().__init__()
+        self.in_features = d
+        self.out_features = d
+
+    def forward(self, x):
+        return x
 
 def initialize_transform():
     transform_steps = [transforms.Resize((448, 448))]
@@ -87,10 +101,20 @@ def iwildcam_classification(similarity = 'CS',
     # -------------------------- model
     device = init_gpu('0')
     ####################################
-    model_resnet = models.resnet50(pretrained=True)
-    newmodel = torch.nn.Sequential(*(list(model_resnet.children())[:-1]))
+    #model_resnet = models.resnet50(pretrained=True)
+    #newmodel = torch.nn.Sequential(*(list(model_resnet.children())[:-2]))
+    constructor = getattr(torchvision.models, 'resnet50')
+    last_layer_name = 'fc'
+    feature_extractor = constructor(**kwargs)
+    d_features = getattr(feature_extractor, last_layer_name).in_features
+    last_layer = Identity(d_features)
+    feature_extractor.d_out = d_features
+
+    setattr(feature_extractor, last_layer_name, last_layer)
+
     # print(newmodel)
-    feature_extractor = newmodel
+
+
     model = LayerModel(
         device=device,
         task='classification',
