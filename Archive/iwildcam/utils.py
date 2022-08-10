@@ -52,6 +52,7 @@ domain_net_feature_extractor = nn.Sequential(
 
 def calc_accuracy(pred_one_hot, true_one_hot):
     pred_labels = torch.max(pred_one_hot, dim=1)[1]
-    true_labels = torch.max(true_one_hot, dim=1)[1]
+    #true_labels = torch.max(true_one_hot, dim=1)[1]
+    true_labels = true_one_hot #torch.max(true_one_hot, dim=1)[1]
     acc = 100 * accuracy(pred_labels, true_labels).item()
     return acc

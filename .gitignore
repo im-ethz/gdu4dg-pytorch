@@ -1,1 +1,7 @@
 __pycache__/
+/.idea
+*.txt
+*.gz
+*.log
+*.pth
+*.csv
