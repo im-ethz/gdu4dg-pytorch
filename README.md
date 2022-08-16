@@ -2,7 +2,7 @@
 
 [![DOI](https://img.shields.io/badge/DOI-2206.12444/arxiv.org/abs/2206.12444-red.svg)](https://arxiv.org/abs/2206.12444)
 
-TensorFlow ➡️ [here](https://github.com/im-ethz/pub-gdu4dg).
+TensorFlow? ➡️ [here](https://github.com/im-ethz/pub-gdu4dg).
 
 🚀 User-friendly. Simple. Powerful.
 
