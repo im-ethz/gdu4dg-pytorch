@@ -2,9 +2,9 @@ import os
 import torch
 import pandas as pd
 import numpy as np
-from wilds.datasets.wilds_dataset import WILDSDataset
-from wilds.common.grouper import CombinatorialGrouper
-from wilds.common.metrics.all_metrics import Accuracy
+from ..datasets.wilds_dataset import WILDSDataset
+from ..common.grouper import CombinatorialGrouper
+from ..common.metrics.all_metrics import Accuracy
 
 class CivilCommentsDataset(WILDSDataset):
     """

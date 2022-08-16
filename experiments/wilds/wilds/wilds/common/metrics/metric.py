@@ -88,10 +88,10 @@ class Metric:
             else:
                 agg_metric = torch.tensor(0.)
         else:
-            if algorithm == None:
-                agg_metric = self._compute(y_pred, y_true)
-            else:
+            if 'gdu' in self.name:
                 agg_metric = self._compute(y_pred, y_true, algorithm)
+            else:
+                agg_metric = self._compute(y_pred, y_true)
         if return_dict:
             results = {
                 self.agg_metric_field: agg_metric.item()
@@ -128,17 +128,24 @@ class Metric:
         else:
             return group_metrics, group_counts, worst_group_metric
 
-    def _compute_group_wise(self, y_pred, y_true, g, n_groups, algorithm=None):
+    def _compute_group_wise(self, y_pred, y_true, g, n_groups, algorithm):
         group_metrics = []
         group_counts = get_counts(g, n_groups)
         for group_idx in range(n_groups):
             if group_counts[group_idx]==0:
                 group_metrics.append(torch.tensor(0., device=g.device))
             else:
-                group_metrics.append(
-                    self._compute(
-                        y_pred[g == group_idx],
-                        y_true[g == group_idx]), algorithm)
+                if 'gdu' in self.name:
+                    group_metrics.append(
+                        self._compute(
+                            y_pred[g == group_idx],
+                            y_true[g == group_idx], algorithm))
+                else:
+                    group_metrics.append(
+                        self._compute(
+                            y_pred[g == group_idx],
+                            y_true[g == group_idx]))
+
 
         group_metrics = torch.stack(group_metrics)
         worst_group_metric = self.worst(group_metrics[group_counts>0])
@@ -179,19 +186,25 @@ class ElementwiseMetric(Metric):
         Output:
             - avg_metric (0-dim tensor): average of element-wise metrics
         """
-        if self.name=='acc' or algorithm == None:
+        if 'gdu' in self.name:
+            element_wise_metrics = self._compute_element_wise(y_pred, y_true, algorithm)
+        elif 'acc' in self.name:
             element_wise_metrics = self._compute_element_wise(y_pred, y_true)
         else:
+            algorithm = None
             element_wise_metrics = self._compute_element_wise(y_pred, y_true, algorithm)
 
         avg_metric = element_wise_metrics.mean()
         return avg_metric
 
-    def _compute_group_wise(self, y_pred, y_true, g, n_groups, algorithm=None):
+    def _compute_group_wise(self, y_pred, y_true, g, n_groups, algorithm):
 
-        if self.name == 'acc' or algorithm == None:
+        if 'gdu' in self.name:
+            element_wise_metrics = self._compute_element_wise(y_pred, y_true, algorithm)
+        elif 'acc' in self.name:
             element_wise_metrics = self._compute_element_wise(y_pred, y_true)
         else:
+            algorithm = None
             element_wise_metrics = self._compute_element_wise(y_pred, y_true, algorithm)
 
         group_metrics, group_counts = avg_over_groups(element_wise_metrics, g, n_groups)
@@ -235,11 +248,11 @@ class ElementwiseMetric(Metric):
             return flattened_metrics, index
 
 class MultiTaskMetric(Metric):
-    def _compute_flattened(self, flattened_y_pred, flattened_y_true):
+    def _compute_flattened(self, flattened_y_pred, flattened_y_true, algorithm):
         raise NotImplementedError
 
-    def _compute(self, y_pred, y_true, algorithm):
-        flattened_metrics, _ = self.compute_flattened(y_pred, y_true, return_dict=False)
+    def _compute(self, y_pred, y_true, algorithm=None):
+        flattened_metrics, _ = self.compute_flattened(y_pred, y_true, algorithm, return_dict=False)
         if flattened_metrics.numel()==0:
             return torch.tensor(0., device=y_true.device)
         else:
@@ -252,12 +265,19 @@ class MultiTaskMetric(Metric):
         worst_group_metric = self.worst(group_metrics[group_counts>0])
         return group_metrics, group_counts, worst_group_metric
 
-    def compute_flattened(self, y_pred, y_true, return_dict=True):
+    def compute_flattened(self, y_pred, y_true, algorithm, return_dict=True):
         is_labeled = ~torch.isnan(y_true)
         batch_idx = torch.where(is_labeled)[0]
         flattened_y_pred = y_pred[is_labeled]
         flattened_y_true = y_true[is_labeled]
-        flattened_metrics = self._compute_flattened(flattened_y_pred, flattened_y_true)
+        if 'gdu' in self.name:
+            flattened_metrics = self._compute_flattened(flattened_y_pred, flattened_y_true, algorithm)
+        elif 'acc' in self.name:
+            flattened_metrics = self._compute_flattened(flattened_y_pred, flattened_y_true)
+        else:
+            algorithm = None
+            flattened_metrics = self._compute_flattened(flattened_y_pred, flattened_y_true, algorithm)
+
         if return_dict:
             return {self.name: flattened_metrics, 'index': batch_idx}
         else:

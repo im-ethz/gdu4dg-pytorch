@@ -46,7 +46,7 @@ class ElementwiseLoss(ElementwiseMetric):
         Output:
             - element_wise_metrics (Tensor): tensor of size (batch_size, )
         """
-        if self.name == 'gdu_cross_entropy':
+        if 'gdu' in self.name:
             return self.loss_fn(y_pred, y_true, model)
         else:
             return self.loss_fn(y_pred, y_true)
@@ -68,13 +68,17 @@ class MultiTaskLoss(MultiTaskMetric):
             name = 'loss'
         super().__init__(name=name)
 
-    def _compute_flattened(self, flattened_y_pred, flattened_y_true):
-        if isinstance(self.loss_fn, torch.nn.BCEWithLogitsLoss):
+    def _compute_flattened(self, flattened_y_pred, flattened_y_true, model):
+        if isinstance(self.loss_fn, torch.nn.BCEWithLogitsLoss) or self.name == 'gdu_multitask_bce':
             flattened_y_pred = flattened_y_pred.float()
             flattened_y_true = flattened_y_true.float()
         elif isinstance(self.loss_fn, torch.nn.CrossEntropyLoss):
             flattened_y_true = flattened_y_true.long()
-        flattened_loss = self.loss_fn(flattened_y_pred, flattened_y_true)
+
+        if 'gdu' in self.name:
+            flattened_loss = self.loss_fn(flattened_y_pred, flattened_y_true, model)
+        else:
+            flattened_loss = self.loss_fn(flattened_y_pred, flattened_y_true)
         return flattened_loss
 
     def worst(self, metrics):

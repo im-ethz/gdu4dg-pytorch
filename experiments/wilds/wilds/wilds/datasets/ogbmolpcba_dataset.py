@@ -1,7 +1,7 @@
 import os
 import torch
 import numpy as np
-from wilds.datasets.wilds_dataset import WILDSDataset
+from ..datasets.wilds_dataset import WILDSDataset
 from ogb.graphproppred import PygGraphPropPredDataset, Evaluator
 from ogb.utils.url import download_url
 import torch_geometric

@@ -51,7 +51,8 @@ class GDULayer(nn.Module):
         self.output_dim = 1 if task == 'classification' else 2
 
     def forward(self, x_tilde):
-        self.betas = torch.zeros(x_tilde.size(0), self.num_gdus).to(self.device)                                # betas: (batch_size, num_gdus)
+        self.betas = torch.zeros(x_tilde.size(0), self.num_gdus).to(self.device)
+        #print(x_tilde.size())# betas: (batch_size, num_gdus)
         y_tildes = torch.zeros(x_tilde.size(0), self.num_gdus, self.output_size, self.output_dim).to(self.device)
         weighted_predictions = torch.zeros(x_tilde.size(0), self.num_gdus, self.output_size, self.output_dim).to(self.device)
 

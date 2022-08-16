@@ -29,7 +29,7 @@ def get_dataset(dataset: str, version: Optional[str] = None, unlabeled: bool = F
             from  ..wilds.datasets.unlabeled.amazon_unlabeled_dataset import AmazonUnlabeledDataset
             return AmazonUnlabeledDataset(version=version, **dataset_kwargs)
         else:
-            from  .. ..wilds.datasets.amazon_dataset import AmazonDataset
+            from  ..wilds.datasets.amazon_dataset import AmazonDataset
             return AmazonDataset(version=version, **dataset_kwargs)
 
     elif dataset == 'camelyon17':

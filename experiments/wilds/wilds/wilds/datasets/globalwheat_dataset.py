@@ -3,9 +3,9 @@ import pandas as pd
 import torch
 from pathlib import Path
 from PIL import Image
-from wilds.datasets.wilds_dataset import WILDSDataset
-from wilds.common.grouper import CombinatorialGrouper
-from wilds.common.metrics.all_metrics import DetectionAccuracy
+from ..datasets.wilds_dataset import WILDSDataset
+from ..common.grouper import CombinatorialGrouper
+from ..common.metrics.all_metrics import DetectionAccuracy
 
 SESSIONS = [
     'Arvalis_1',

@@ -4,10 +4,10 @@ import torch
 from torch.utils.data import Dataset
 import pickle
 import numpy as np
-from wilds.datasets.wilds_dataset import WILDSDataset
-from wilds.common.metrics.all_metrics import MSE, PearsonCorrelation
-from wilds.common.grouper import CombinatorialGrouper
-from wilds.common.utils import subsample_idxs, shuffle_arr
+from ..datasets.wilds_dataset import WILDSDataset
+from ..common.metrics.all_metrics import MSE, PearsonCorrelation
+from ..common.grouper import CombinatorialGrouper
+from ..common.utils import subsample_idxs, shuffle_arr
 
 DATASET = '2009-17'
 BAND_ORDER = ['BLUE', 'GREEN', 'RED', 'SWIR1', 'SWIR2', 'TEMP1', 'NIR', 'NIGHTLIGHTS']

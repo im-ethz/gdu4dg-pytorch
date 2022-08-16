@@ -19,8 +19,8 @@ Evaluate predictions for WILDS datasets.
 
 Usage:
 
-    python examples/evaluate.py <Path to directory with predictions>  <Path to output directory>
-    python examples/evaluate.py <Path to directory with predictions>  <Path to output directory> --dataset <A WILDS dataset>
+    python examples/evaluate_wilds.py <Path to directory with predictions>  <Path to output directory>
+    python examples/evaluate_wilds.py <Path to directory with predictions>  <Path to output directory> --dataset <A WILDS dataset>
 
 """
 

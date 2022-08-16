@@ -321,7 +321,7 @@ The repository is set up to facilitate general-purpose algorithm development: ne
 We also provide an evaluation script that aggregates prediction CSV files for different replicates and reports on their combined evaluation. To use this, run:
 
 ```bash
-python examples/evaluate.py <predictions_dir> <output_dir> --root_dir <root_dir>
+python examples/evaluate_wilds.py <predictions_dir> <output_dir> --root_dir <root_dir>
 ```
 
 where `<predictions_dir>` is the path to your predictions directory, `<output_dir>` is where the results JSON will be writte, and `<root_dir>` is the dataset root directory.

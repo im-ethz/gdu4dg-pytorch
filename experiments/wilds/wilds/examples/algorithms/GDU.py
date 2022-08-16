@@ -1,47 +1,20 @@
 import torch
-import os
 
 from .single_model_algorithm import SingleModelAlgorithm
 from ..models.initializer import initialize_model
 from ..utils import move_to, load
 
 from .gdu_pytorch.model import LayerModel
-
-urls_for_fe = {('rxrx1',0): 'https://worksheets.codalab.org/rest/bundles/0x7d33860545b64acca5047396d42c0ea0/contents/blob/rxrx1_seed%3A0_epoch%3Abest_model.pth',
-               ('rxrx1',1): 'https://worksheets.codalab.org/rest/bundles/0xaf367840549942f79b5dd62a27b1f371/contents/blob/rxrx1_seed%3A1_epoch%3Abest_model.pth',
-               ('rxrx1',2): 'https://worksheets.codalab.org/rest/bundles/0x21228e26705c4e05a1059de25458d2a0/contents/blob/rxrx1_seed%3A2_epoch%3Abest_model.pth',
-               ('fmow',0): 'https://worksheets.codalab.org/rest/bundles/0x20182ee424504e4a916fe88c91afd5a2/contents/blob/fmow_seed%3A0_epoch%3Abest_model.pth',
-               ('fmow',1): 'https://worksheets.codalab.org/rest/bundles/0x58b4aca2660d455eb74339db95e140c1/contents/blob/fmow_seed%3A1_epoch%3Abest_model.pth',
-               ('fmow',2): 'https://worksheets.codalab.org/rest/bundles/0x55adb69b3ac3482393e0697a52555acf/contents/blob/fmow_seed%3A2_epoch%3Abest_model.pth',
-               ('iwildcam',0): 'https://worksheets.codalab.org/rest/bundles/0xc006392d35404899bf248d8f3dc8a8f2/contents/blob/best_model.pth',
-               ('iwildcam',1): 'https://worksheets.codalab.org/rest/bundles/0xe3ae2fef2d624309b40c9c8b24ca59ca/contents/blob/best_model.pth',
-               ('iwildcam',2): 'https://worksheets.codalab.org/rest/bundles/0xb16de89752ec43b0bf79b36c0e6dc277/contents/blob/best_model.pth',
-               ('camelyon17',0): 'https://worksheets.codalab.org/rest/bundles/0x6029addd6f714167a4d34fb5351347c6/contents/blob/best_model.pth',
-               ('camelyon17',1): 'https://worksheets.codalab.org/rest/bundles/0xb701f5de96064c0fa1771418da5df499/contents/blob/best_model.pth',
-               ('camelyon17',2): 'https://worksheets.codalab.org/rest/bundles/0x2ce5ec845b07488fb3396ab1ab8e3e17/contents/blob/best_model.pth',
-               ('camelyon17',3): 'https://worksheets.codalab.org/rest/bundles/0x70f110e8a86e4c3aa2688bc1267e6631/contents/blob/best_model.pth',
-               ('camelyon17',4): 'https://worksheets.codalab.org/rest/bundles/0x0fe16428860749d6b94dfb1fe9ffe986/contents/blob/best_model.pth',
-               ('camelyon17',5): 'https://worksheets.codalab.org/rest/bundles/0x0dc383dbf97a491fab9fb630c4119e3d/contents/blob/last_model.pth',
-               ('camelyon17',6): 'https://worksheets.codalab.org/rest/bundles/0xb7884cbe61584e80bfadd160e1514570/contents/blob/best_model.pth',
-               ('camelyon17',7): 'https://worksheets.codalab.org/rest/bundles/0x6f1aaa4697944b24af06db6a734f341e/contents/blob/best_model.pth',
-               ('camelyon17',8): 'https://worksheets.codalab.org/rest/bundles/0x043be722cf50447d9b52d3afd5e55716/contents/blob/best_model.pth',
-               ('camelyon17',9): 'https://worksheets.codalab.org/rest/bundles/0xc3ce3f5a89f84a84a1ef9a6a4a398109/contents/blob/best_model.pth'}
+from .pre_trained_FE.loader import fe_loader
 
 class GDU(SingleModelAlgorithm):
     def __init__(self, config, d_out, grouper, loss,
             metric, n_train_steps):
-        model = initialize_model(config, None)
+        model = initialize_model(config, None, is_featurizer=True)
 
         if config.gdu_kwargs['FE']:
-
             try:
-                from urllib import request
-                fe_path = f'./wilds/examples/algorithms/pre_trained_FE/{config.dataset}/best_model_{config.seed}.pth'
-
-                if not os.path.exists(fe_path):
-                    print('Download Model from URL')
-                    _ = request.urlretrieve(urls_for_fe[(config.dataset, config.seed)], fe_path)
-
+                fe_path = fe_loader(config)
                 _,_ = load(model, path = fe_path, device=config.device)
 
                 print('Successfully loaded pretrained FE from WILDS .... ')
@@ -53,9 +26,17 @@ class GDU(SingleModelAlgorithm):
                 print('Could not load pretrained FE ...')
                 print(e)
 
-        for layer in model.children():
-            if hasattr(layer, 'out_features'):
-                output_size = layer.out_features
+        if config.model in ['bert-base-uncased', 'distilbert-base-uncased', 'code-gpt-py', 'resnet18_ms']:
+            output_size = model[-2].d_out
+
+        if config.dataset == 'ogb-molpcba':
+            output_size = 300
+
+
+        if config.model in ['resnet50', 'densenet121']:
+            for layer in model.children():
+                if hasattr(layer, 'out_features'):
+                    output_size = layer.out_features
 
         model = LayerModel(
             device=config.device,

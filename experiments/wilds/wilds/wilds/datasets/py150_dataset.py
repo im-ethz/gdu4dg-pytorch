@@ -6,8 +6,8 @@ import numpy as np
 import torch
 import json
 import gc
-from wilds.common.metrics.all_metrics import Accuracy
-from wilds.datasets.wilds_dataset import WILDSDataset
+from ..common.metrics.all_metrics import Accuracy
+from ..datasets.wilds_dataset import WILDSDataset
 from transformers import GPT2Tokenizer
 
 class Py150Dataset(WILDSDataset):

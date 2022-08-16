@@ -5,6 +5,7 @@ from torch import nn
 class LayerLoss(nn.Module):
     def __init__(
             self,
+            name,
             device,
             criterion,
             sigma,
@@ -15,6 +16,7 @@ class LayerLoss(nn.Module):
             sparse_coding
     ):
         super(LayerLoss, self).__init__()
+        self.name = name
         self.device = device
         self.sigma = sigma
         self.criterion = criterion

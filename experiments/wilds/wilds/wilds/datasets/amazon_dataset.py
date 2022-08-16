@@ -6,10 +6,10 @@ import torch
 import pandas as pd
 import numpy as np
 
-from wilds.datasets.wilds_dataset import WILDSDataset
-from wilds.common.utils import map_to_id_array
-from wilds.common.metrics.all_metrics import Accuracy
-from wilds.common.grouper import CombinatorialGrouper
+from ..datasets.wilds_dataset import WILDSDataset
+from ..common.utils import map_to_id_array
+from ..common.metrics.all_metrics import Accuracy
+from ..common.grouper import CombinatorialGrouper
 
 
 class AmazonDataset(WILDSDataset):

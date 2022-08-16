@@ -298,10 +298,10 @@ def mse_loss(out, targets):
         return losses
 
 class MSE(ElementwiseLoss):
-    def __init__(self, name=None):
+    def __init__(self, name=None, loss_fn=mse_loss):
         if name is None:
             name = 'mse'
-        super().__init__(name=name, loss_fn=mse_loss)
+        super().__init__(name=name, loss_fn=loss_fn)
 
 class PrecisionAtRecall(Metric):
     """Given a specific model threshold, determine the precision score achieved"""
