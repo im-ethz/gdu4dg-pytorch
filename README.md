@@ -1,6 +1,7 @@
-[![DOI](https://img.shields.io/badge/DOI-10.1016/j.cmpb.2021.106461-red.svg)](https://arxiv.org/abs/2206.12444)
-
 # Gated Domain Units (PyTorch)
+
+[![DOI](https://img.shields.io/badge/DOI-2206.12444/arxiv.org/abs/2206.12444-red.svg)](https://arxiv.org/abs/2206.12444)
+
 For the TensorFlow implementation please check-out our [TF implementation our GDUs](https://github.com/im-ethz/pub-gdu4dg).
 
 
