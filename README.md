@@ -43,3 +43,8 @@ Currently we do not support installation via pip or conda. To install and use ou
 ### Example: Extend existing deep learning Models with Gated Domain Units
 
 ### Set the parameters
+
+## References
+
+- [WILDS experiments](https://github.com/p-lambda/wilds)
+- [DOMAINBED experiments](https://github.com/facebookresearch/DomainBed)
