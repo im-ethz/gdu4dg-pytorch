@@ -4,9 +4,7 @@
 [![DOI](https://img.shields.io/badge/DOI-2206.12444/arxiv.org/abs/2206.12444-red.svg)](https://arxiv.org/abs/2206.12444)
 ![GDU_logo](https://user-images.githubusercontent.com/73110207/185412013-40309db3-dc3d-4f32-bf65-6c00e87d28a7.png)
 
-Gated Domain Units (GDU) aim to make your deep learning models robust against distribution shifts when applied in the real world. To make the GDus simple and easily applicable, we integrated our GDU into a modular layer. Hence, our GDUs can be applied to your deep learning models by simply replacing the task-specific head of your model with our layer. For example, you can use a pre-trained ResNet-50 as the feature extractor, and instead of a classification head, you attach our layer that performs the same classification task. 
-
-TensorFlow? ➡️ [here](https://github.com/im-ethz/pub-gdu4dg).
+Gated Domain Units (GDU) aim to make your deep learning models robust against distribution shifts when applied in the real world. To make the GDus simple and easily applicable, we integrated our GDU into a modular layer. Hence, our GDUs can be applied to your deep learning models by simply replacing the task-specific head of your model with our layer. For example, you can use a pre-trained ResNet-50 as the feature extractor, and instead of a classification head, you attach our layer that performs the same classification task. TensorFlow? ➡️ [here](https://github.com/im-ethz/pub-gdu4dg).
 
 🚀 User-friendly. Simple. Powerful.
 
