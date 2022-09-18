@@ -68,6 +68,18 @@ def get_algorithm_class(algorithm_name):
         raise NotImplementedError("Algorithm not found: {}".format(algorithm_name))
     return globals()[algorithm_name.split('-')[0] if "GDU" in algorithm_name else algorithm_name]
 
+def get_pretrained_erm(args):
+    import subprocess
+
+    results_dir = "/local/home/sfoell/GitHub/gdu-pytorch/experiments/domainbed/results/ERM" #Specifiy where the sweep ERM results are stored
+
+    specification = f"python -m list_top_hparams --input_dir {results_dir} --algorithm ERM --dataset {args.dataset} " \
+                    f"--test_env {args.test_envs[0]} --gdu_ft True --seed {args.hparams_seed}"
+    proc = subprocess.check_output(specification,shell=True)
+    erm_dir = proc.decode("utf-8").split(':')[-1][:-1] + "/model.pkl"
+    print(args.test_envs[0], erm_dir)
+    return erm_dir
+
 class Algorithm(torch.nn.Module):
     """
     A subclass of Algorithm implements a domain generalization algorithm.
@@ -75,12 +87,10 @@ class Algorithm(torch.nn.Module):
     - update()
     - predict()
     """
-    def __init__(self, input_shape, num_classes, num_domains, hparams, loss_kwargs = None, gdu_kwargs = None):
+    def __init__(self, input_shape, num_classes, num_domains, hparams, args = None):
         super(Algorithm, self).__init__()
         self.hparams = hparams
-        if loss_kwargs and gdu_kwargs:
-            self.loss_kwargs = loss_kwargs
-            self.gdu_kwargs = gdu_kwargs
+        self.args = args
 
     def update(self, minibatches, unlabeled=None):
         """
@@ -132,15 +142,44 @@ class ERM(Algorithm):
         return self.network(x)
 
 
+
 class GDU(Algorithm):
     """
     Gated Domain Units (GDU)
     """
 
-    def __init__(self, input_shape, num_classes, num_domains, hparams):
+    def __init__(self, input_shape, num_classes, num_domains, hparams, args):
         super(GDU, self).__init__(input_shape, num_classes, num_domains,
-                                  hparams)
-        self.featurizer = networks.Featurizer(input_shape, self.hparams)
+                                  hparams, args)
+        print(self.args.algorithm)
+        if "FT" in self.args.algorithm:
+            print("Loading pre-trained FE from ERM sweep")
+            featurizer = networks.Featurizer(input_shape, self.hparams)
+            temp_classifier = networks.Classifier(featurizer.n_outputs, num_classes,self.hparams['nonlinear_classifier'])
+            temp_network = nn.Sequential(featurizer, temp_classifier)
+            model_dir = get_pretrained_erm(self.args)
+            load_state = torch.load(model_dir)
+            load_state['model_dict'] = {k[k.index(".") + 1:]: v for k, v in load_state['model_dict'].items()}
+            for k in list(load_state['model_dict'].keys()):
+                if not k[0].isnumeric():
+                    del load_state['model_dict'][k]
+
+            temp_network.load_state_dict(load_state['model_dict'])
+            self.featurizer = temp_network[:-1]
+            print(self.featurizer)
+
+            for layer in self.featurizer.children():
+                for param in layer.parameters():
+                    param.requires_grad = False
+
+                if not "MNIST" in args.dataset and hasattr(layer, 'out_features'):
+                    output_size = layer.out_features #ResNet 2048; hard code if it fails
+                elif "MNIST" in args.dataset:
+                    output_size = 128
+
+        else:
+            self.featurizer = networks.Featurizer(input_shape, self.hparams)
+            output_size = self.featurizer.n_outputs
 
         self.layer_criterion = LayerLoss(
             name='gdu_loss',
@@ -158,7 +197,7 @@ class GDU(Algorithm):
             device="cuda",
             task='classification',
             feature_extractor=self.featurizer,
-            feature_vector_size=self.featurizer.n_outputs,
+            feature_vector_size=output_size,
             output_size=num_classes,
             num_gdus=self.hparams['num_gdus'],
             domain_dim=self.hparams['domain_dim'],
@@ -169,7 +208,7 @@ class GDU(Algorithm):
         )
 
         self.optimizer = torch.optim.Adam(
-            self.network.parameters(),
+            filter(lambda p: p.requires_grad, self.network.parameters()) if "FT" in self.args.algorithm else self.network.parameters(),
             lr=self.hparams["lr"],
             weight_decay=self.hparams['weight_decay']
         )

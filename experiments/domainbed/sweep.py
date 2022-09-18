@@ -154,15 +154,16 @@ if __name__ == "__main__":
     parser.add_argument('--single_test_envs', action='store_true')
     parser.add_argument('--skip_confirmation', action='store_true')
     args = parser.parse_args()
-    #args = parser.parse_args(['launch',
-    #                          '--algorithms', 'GDU-E2E-CS',
-    #                          '--dataset', 'RotatedMNIST',
-    #                          '--n_hparams', '1',
-    #                          '--n_trials', '1',
-    #                          '--data_dir', './data',
-    #                          '--output_dir', './results/GDU',
-    #                          '--command_launcher', 'multi_gpu'])
-
+    '''
+    args = parser.parse_args(['launch',
+                              '--algorithms', 'GDU-FT-CS',
+                              '--dataset', 'RotatedMNIST',
+                              '--n_hparams', '1',
+                              '--n_trials', '1',
+                              '--data_dir', './data',
+                              '--output_dir', './results/GDU_FT',
+                              '--command_launcher', 'multi_gpu'])
+    '''
     args_list = make_args_list(
         n_trials=args.n_trials,
         dataset_names=args.datasets,

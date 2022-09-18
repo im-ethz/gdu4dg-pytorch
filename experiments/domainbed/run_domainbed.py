@@ -74,14 +74,13 @@ if __name__ == "__main__":
         help="For domain adaptation, % of test to use unlabeled for training.")
     parser.add_argument('--skip_model_save', action='store_true')
     parser.add_argument('--save_model_every_checkpoint', action='store_true')
-
-    args = parser.parse_args(['--algorithm', 'GDU-E2E-CS',
-                              '--dataset', 'OfficeHome',
-                              '--data_dir', './data',
-                              '--output_dir', './results'])
+    args = parser.parse_args()
+    #args = parser.parse_args(['--algorithm', 'ERM',
+    #                          #'--dataset', 'DomainNet',
+    #                          '--data_dir', './data',
+    #                          '--output_dir', './results'])
 
     import datetime
-
     args.output_dir = args.output_dir + f'/{datetime.date.today()}/{args.dataset}/{args.algorithm}/{args.seed}'
 
     # If we ever want to implement checkpointing, just persist these values
@@ -208,8 +207,12 @@ if __name__ == "__main__":
 
     algorithm_class = algorithms.get_algorithm_class(args.algorithm)
 
-    algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
-                                len(dataset) - len(args.test_envs), hparams)
+    if "GDU" in args.algorithm:
+        algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
+                                    len(dataset) - len(args.test_envs), hparams, args)
+    else:
+        algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
+                                    len(dataset) - len(args.test_envs), hparams)
 
     if algorithm_dict is not None:
         algorithm.load_state_dict(algorithm_dict)
