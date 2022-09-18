@@ -21,12 +21,17 @@ from .lib.misc import (
     random_pairs_of_minibatches, ParamDict, MovingAverage, l2_between_dicts
 )
 
-from .gdu_pytorch.model import LayerModel
-from .gdu_pytorch.loss import LayerLoss
+from domainbed.gdu_pytorch.model import LayerModel
+from domainbed.gdu_pytorch.loss import LayerLoss
 
 ALGORITHMS = [
     'ERM',
-    'GDU',
+    'GDU-FT-CS',
+    'GDU-FT-MMD',
+    'GDU-E2E-CS',
+    'GDU-E2E-MMD',
+    'GDU-FT-Projected',
+    'GDU-E2E-Projected',
     'Fish',
     'IRM',
     'GroupDRO',
@@ -59,9 +64,9 @@ ALGORITHMS = [
 
 def get_algorithm_class(algorithm_name):
     """Return the algorithm class with the given name."""
-    if algorithm_name not in globals():
+    if (algorithm_name.split('-')[0] if "GDU" in algorithm_name else algorithm_name) not in globals():
         raise NotImplementedError("Algorithm not found: {}".format(algorithm_name))
-    return globals()[algorithm_name]
+    return globals()[algorithm_name.split('-')[0] if "GDU" in algorithm_name else algorithm_name]
 
 class Algorithm(torch.nn.Module):
     """
@@ -132,35 +137,35 @@ class GDU(Algorithm):
     Gated Domain Units (GDU)
     """
 
-    def __init__(self, input_shape, num_classes, num_domains, hparams, loss_kwargs, gdu_kwargs):
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
         super(GDU, self).__init__(input_shape, num_classes, num_domains,
-                                  hparams, loss_kwargs, gdu_kwargs)
+                                  hparams)
         self.featurizer = networks.Featurizer(input_shape, self.hparams)
 
         self.layer_criterion = LayerLoss(
             name='gdu_loss',
-            device=gdu_kwargs['device'],
+            device="cuda",
             criterion=nn.CrossEntropyLoss(),
-            sigma=loss_kwargs['sigma'],
-            lambda_OLS=loss_kwargs['lambda_OLS'],
-            lambda_orth=loss_kwargs['lambda_orth'],
-            lambda_sparse=loss_kwargs['lambda_sparse'],
-            orthogonal_loss=loss_kwargs['orthogonal_loss'],
-            sparse_coding=loss_kwargs['sparse_coding']
+            sigma=self.hparams['sigma'],
+            lambda_OLS=self.hparams['lambda_OLS'],
+            lambda_orth=self.hparams['lambda_orth'],
+            lambda_sparse=self.hparams['lambda_sparse'],
+            orthogonal_loss=self.hparams['orthogonal_loss'],
+            sparse_coding=self.hparams['sparse_coding']
         )
 
         self.network = LayerModel(
-            device=gdu_kwargs['device'],
+            device="cuda",
             task='classification',
             feature_extractor=self.featurizer,
             feature_vector_size=self.featurizer.n_outputs,
             output_size=num_classes,
-            num_gdus=gdu_kwargs['num_gdus'],
-            domain_dim=gdu_kwargs['domain_dim'],
-            kernel_name=gdu_kwargs['kernel_name'],
-            sigma=gdu_kwargs['sigma'],
-            similarity_measure_name=gdu_kwargs['similarity_measure_name'],  # MMD, CS, Projected
-            softness_param=gdu_kwargs['softness_param']
+            num_gdus=self.hparams['num_gdus'],
+            domain_dim=self.hparams['domain_dim'],
+            kernel_name=self.hparams['kernel_name'],
+            sigma=self.hparams['sigma'],
+            similarity_measure_name=self.hparams['similarity_measure_name'],  # MMD, CS, Projected
+            softness_param=self.hparams['softness_param']
         )
 
         self.optimizer = torch.optim.Adam(

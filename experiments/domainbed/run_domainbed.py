@@ -53,8 +53,8 @@ if __name__ == "__main__":
     parser.add_argument('--hparams', type=str,
         help='JSON-serialized hparams dict')
 
-    parser.add_argument('--loss_kwargs', nargs='*', action=ParseKwargs, default={})
-    parser.add_argument('--gdu_kwargs', nargs='*', action=ParseKwargs, default={})
+    #parser.add_argument('--loss_kwargs', nargs='*', action=ParseKwargs, default={})
+    #parser.add_argument('--gdu_kwargs', nargs='*', action=ParseKwargs, default={})
 
     parser.add_argument('--hparams_seed', type=int, default=0,
         help='Seed for random hparams (0 means "default hparams")')
@@ -75,31 +75,14 @@ if __name__ == "__main__":
     parser.add_argument('--skip_model_save', action='store_true')
     parser.add_argument('--save_model_every_checkpoint', action='store_true')
 
-    args = parser.parse_args(['--algorithm', 'GDU',
+    args = parser.parse_args(['--algorithm', 'GDU-E2E-CS',
+                              '--dataset', 'OfficeHome',
                               '--data_dir', './data',
-                              '--output_dir', './results',
-                              '--loss_kwargs',
-                              'device=0',
-                              'sigma=4',
-                              'lambda_OLS=0.001',
-                              'lambda_sparse=0.001',
-                              'lambda_orth=0.001',
-                              'orthogonal_loss=False',
-                              'sparse_coding=True',
-                              '--gdu_kwargs',
-                              'device=0',
-                              'num_gdus=5',
-                              'domain_dim=10',
-                              'kernel_name=RBF',
-                              'sigma=4',
-                              'similarity_measure_name=CS',
-                              'softness_param=2',
-                              'FE=True'
-                              ])
+                              '--output_dir', './results'])
 
     import datetime
 
-    args.output_dir = args.output_dir + f'/{datetime.date.today()}/{args.dataset}/{"FT" if args.gdu_kwargs["FE"] else "E2E"}_{args.seed}'
+    args.output_dir = args.output_dir + f'/{datetime.date.today()}/{args.dataset}/{args.algorithm}/{args.seed}'
 
     # If we ever want to implement checkpointing, just persist these values
     # every once in a while, and then load them from disk here.
@@ -225,12 +208,8 @@ if __name__ == "__main__":
 
     algorithm_class = algorithms.get_algorithm_class(args.algorithm)
 
-    if args.algorithm == "GDU":
-        algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
-            len(dataset) - len(args.test_envs), hparams, args.loss_kwargs, args.gdu_kwargs)
-    else:
-        algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
-                                    len(dataset) - len(args.test_envs), hparams)
+    algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
+                                len(dataset) - len(args.test_envs), hparams)
 
     if algorithm_dict is not None:
         algorithm.load_state_dict(algorithm_dict)
@@ -270,8 +249,8 @@ if __name__ == "__main__":
                 for x,_ in next(uda_minibatches_iterator)]
         else:
             uda_device = None
-        #print(algorithm)
-        if args.algorithm == "GDU":
+
+        if "GDU" in args.algorithm :
             step_vals = algorithm.update(minibatches_device, network = algorithm.network)
         else:
             step_vals = algorithm.update(minibatches_device)

@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from gdu_pytorch.gdu import GDULayer
+from ..gdu_pytorch.gdu import GDULayer
 
 
 class LayerModel(nn.Module):

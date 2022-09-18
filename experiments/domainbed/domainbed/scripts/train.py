@@ -214,7 +214,10 @@ if __name__ == "__main__":
                 for x,_ in next(uda_minibatches_iterator)]
         else:
             uda_device = None
-        step_vals = algorithm.update(minibatches_device, uda_device)
+        if "GDU" in args.algorithm:
+            step_vals = algorithm.update(minibatches_device, network=algorithm.network)
+        else:
+            step_vals = algorithm.update(minibatches_device, uda_device)
         checkpoint_vals['step_time'].append(time.time() - step_start_time)
 
         for key, val in step_vals.items():
