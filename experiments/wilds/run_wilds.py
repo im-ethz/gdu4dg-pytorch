@@ -171,9 +171,9 @@ def main():
     parser.add_argument('--wandb_kwargs', nargs='*', action=ParseKwargs, default={},
                         help='keyword arguments for wandb.init() passed as key1=value1 key2=value2')
 
-
-
-    #config = parser.parse_args()
+    config = parser.parse_args()
+    '''
+    Sample parameter string parsing
     config = parser.parse_args(['--device', '2',
                                 '--seed', '0',
                                 '--download', 'True',
@@ -183,6 +183,8 @@ def main():
                                 '--root_dir', '../wilds/data',
                                 '--loss_function', 'gdu_loss',
                                 #'--load_featurizer_only', 'True',
+                                '--dataset_kwargs',
+                                'fold=E',
                                 '--loss_kwargs',
                                 'sigma=4',
                                 'lambda_OLS=0.001',
@@ -198,9 +200,9 @@ def main():
                                 'similarity_measure_name=Projected',
                                 'softness_param=2',
                                 'FE=False'])
-
-    import datetime
-    config.log_dir = f'../wilds/logs/{datetime.date.today()}/{config.dataset}/{"FT" if config.gdu_kwargs["FE"] else "E2E"}_{config.seed}'
+    '''
+    #import datetime
+    #config.log_dir = f'../wilds/logs/{datetime.date.today()}/{config.dataset}/{"FT" if config.gdu_kwargs["FE"] else "E2E"}_{config.seed}'
 
     config = populate_defaults(config)
 
