@@ -173,8 +173,12 @@ if __name__ == "__main__":
         for i in range(len(uda_splits))]
 
     algorithm_class = algorithms.get_algorithm_class(args.algorithm)
-    algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
-        len(dataset) - len(args.test_envs), hparams)
+    if "GDU" in args.algorithm:
+        algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
+                                    len(dataset) - len(args.test_envs), hparams, args)
+    else:
+        algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
+                                    len(dataset) - len(args.test_envs), hparams)
 
     if algorithm_dict is not None:
         algorithm.load_state_dict(algorithm_dict)
@@ -214,7 +218,10 @@ if __name__ == "__main__":
                 for x,_ in next(uda_minibatches_iterator)]
         else:
             uda_device = None
-        step_vals = algorithm.update(minibatches_device, uda_device)
+        if "GDU" in args.algorithm:
+            step_vals = algorithm.update(minibatches_device, network=algorithm.network)
+        else:
+            step_vals = algorithm.update(minibatches_device, uda_device)
         checkpoint_vals['step_time'].append(time.time() - step_start_time)
 
         for key, val in step_vals.items():

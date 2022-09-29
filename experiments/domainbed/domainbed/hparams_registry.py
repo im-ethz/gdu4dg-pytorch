@@ -48,6 +48,36 @@ def _hparams(algorithm, dataset, random_seed):
         _hparam('mlp_depth', 3, lambda r: int(r.choice([3, 4, 5])))
         _hparam('mlp_dropout', 0., lambda r: r.choice([0., 0.1, 0.5]))
 
+    elif algorithm in ['GDU-FT-CS', 'GDU-FT-MMD', 'GDU-E2E-CS', 'GDU-E2E-MMD']:
+        similarity_measure = algorithm.split('-')[-1]
+        _hparam('similarity_measure_name', similarity_measure, lambda r: similarity_measure)
+
+        _hparam('orthogonal_loss', False, lambda r: False)
+        _hparam('sparse_coding', True, lambda r: True)
+        _hparam('kernel_name', 'RBF', lambda r: 'RBF')
+        _hparam('num_gdus', 5, lambda r: 5)
+        _hparam('domain_dim', 10, lambda r: 10)
+        _hparam('sigma', 4, lambda r: 4)
+        _hparam('softness_param', 2, lambda r: 2)
+        _hparam('lambda_OLS', 0.001, lambda r: 0.001)
+        _hparam('lambda_sparse', 0.001, lambda r: 0.001)
+        _hparam('lambda_orth', 0, lambda r: 0)
+
+    elif algorithm in ['GDU-FT-Projected', 'GDU-E2E-Projected']:
+        similarity_measure = algorithm.split('-')[-1]
+        _hparam('similarity_measure_name', similarity_measure, lambda r: similarity_measure)
+
+        _hparam('orthogonal_loss', True, lambda r: True)
+        _hparam('sparse_coding', False, lambda r: False)
+        _hparam('kernel_name', 'RBF', lambda r: 'RBF')
+        _hparam('num_gdus', 5, lambda r: 5)
+        _hparam('domain_dim', 10, lambda r: 10)
+        _hparam('sigma', 16, lambda r: 16)
+        _hparam('softness_param', 2, lambda r: 2)
+        _hparam('lambda_OLS', 0.001, lambda r: 0.001)
+        _hparam('lambda_orth', 0.001, lambda r: 0.001)
+        _hparam('lambda_sparse', 0, lambda r: 0)
+
     elif algorithm == 'Fish':
         _hparam('meta_lr', 0.5, lambda r:r.choice([0.05, 0.1, 0.5]))
 

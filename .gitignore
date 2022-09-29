@@ -8,10 +8,6 @@ __pycache__/
 *.txt
 *.pkl
 *.jsonl
-/experiments/domainbed/CODE_OF_CONDUCT.md
-/experiments/domainbed/.gitignore
 /experiments/domainbed/domainbed/misc/
 /experiments/domainbed/domainbed/results/2020_10_06_7df6f06/
-/experiments/domainbed/CONTRIBUTING.md
-/experiments/domainbed/LICENSE
-/experiments/domainbed/README.md
+
