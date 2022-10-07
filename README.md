@@ -44,7 +44,9 @@ Currently we do not support installation via pip or conda. To install and use ou
 
 ## References
 
-- [WILDS experiments](https://github.com/p-lambda/wilds) 1. Koh PW, Sagawa S, Marklund H, et al. WILDS: A Benchmark of in-the-Wild Distribution Shifts. In: Meila M, Zhang T, eds. Proceedings of the 38th International Conference on Machine Learning. Vol 139. PMLR; 2021:5637--5664. https://proceedings.mlr.press/v139/koh21a.html
+This repository uses code from the following references. Please see their licence statements.
+
+- [WILDS experiments](https://github.com/p-lambda/wilds) Koh PW, Sagawa S, Marklund H, et al. WILDS: A Benchmark of in-the-Wild Distribution Shifts. In: Meila M, Zhang T, eds. Proceedings of the 38th International Conference on Machine Learning. Vol 139. PMLR; 2021:5637--5664. https://proceedings.mlr.press/v139/koh21a.html
 
 - [DOMAINBED experiments](https://github.com/facebookresearch/DomainBed) Gulrajani I, Lopez-Paz D. In Search of Lost Domain Generalization. arXiv:200701434 [cs, stat]. Published online July 2, 2020. http://arxiv.org/abs/2007.01434
 
