@@ -32,11 +32,11 @@ urls_for_fe = {('rxrx1',0): 'https://worksheets.codalab.org/rest/bundles/0x7d338
                ('civilcomments',2): 'https://worksheets.codalab.org/rest/bundles/0xb92f899d126d4c6ba73f2730d76ca3e6/contents/blob/best_model.pth',
                ('civilcomments',3): 'https://worksheets.codalab.org/rest/bundles/0x090f8d901fad4bd7be5adb4f30e20271/contents/blob/best_model.pth',
                ('civilcomments',4): 'https://worksheets.codalab.org/rest/bundles/0x7a2e24652b8d4129bc67368864062bb4/contents/blob/best_model.pth',
-               ('poverty',0): 'https://worksheets.codalab.org/rest/bundles/0xbe3ee369fe33424abc73ecccb5f3cfb3/contents/blob/poverty_fold%3AA_epoch%3Abest_model.pth',
-               ('poverty',1): 'https://worksheets.codalab.org/rest/bundles/0x5228855f3fb7423ba6500f0a48114d81/contents/blob/poverty_fold%3AB_epoch%3Abest_model.pth',
-               ('poverty',2): 'https://worksheets.codalab.org/rest/bundles/0x631693184ba94e689b43e3fc1e2af925/contents/blob/poverty_fold%3AC_epoch%3Abest_model.pth',
-               ('poverty',3): 'https://worksheets.codalab.org/rest/bundles/0x988ac7456e3c4161bb2969f34cf5e16a/contents/blob/poverty_fold%3AD_epoch%3Abest_model.pth',
-               ('poverty',4): 'https://worksheets.codalab.org/rest/bundles/0xd4c25459067a4579a69bed46e65aa9da/contents/blob/poverty_fold%3AE_epoch%3Abest_model.pth',
+               ('poverty','A'): 'https://worksheets.codalab.org/rest/bundles/0xbe3ee369fe33424abc73ecccb5f3cfb3/contents/blob/poverty_fold%3AA_epoch%3Abest_model.pth',
+               ('poverty','B'): 'https://worksheets.codalab.org/rest/bundles/0x5228855f3fb7423ba6500f0a48114d81/contents/blob/poverty_fold%3AB_epoch%3Abest_model.pth',
+               ('poverty','C'): 'https://worksheets.codalab.org/rest/bundles/0x631693184ba94e689b43e3fc1e2af925/contents/blob/poverty_fold%3AC_epoch%3Abest_model.pth',
+               ('poverty','D'): 'https://worksheets.codalab.org/rest/bundles/0x988ac7456e3c4161bb2969f34cf5e16a/contents/blob/poverty_fold%3AD_epoch%3Abest_model.pth',
+               ('poverty','E'): 'https://worksheets.codalab.org/rest/bundles/0xd4c25459067a4579a69bed46e65aa9da/contents/blob/poverty_fold%3AE_epoch%3Abest_model.pth',
                ('py150',0): 'https://worksheets.codalab.org/rest/bundles/0x4c09b1a9f1df4911b0fdea55a6bc87b6/contents/blob/best_model.pth',
                ('py150',1): 'https://worksheets.codalab.org/rest/bundles/0x95419de2da314819878528b74179d736/contents/blob/best_model.pth',
                ('py150',2): 'https://worksheets.codalab.org/rest/bundles/0x5fe52cb1cec94224b2b673780b38ff61/contents/blob/best_model.pth',
@@ -53,6 +53,9 @@ def fe_loader (config):
 
     if not os.path.exists(fe_path):
         print('Download Model from URL')
-        _ = request.urlretrieve(urls_for_fe[(config.dataset, config.seed)], fe_path)
+        if config.dataset =="poverty":
+            _ = request.urlretrieve(urls_for_fe[(config.dataset, config.dataset_kwargs['fold'])], fe_path)
+        else:
+            _ = request.urlretrieve(urls_for_fe[(config.dataset, config.seed)], fe_path)
 
     return fe_path
