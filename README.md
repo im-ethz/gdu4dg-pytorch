@@ -44,5 +44,6 @@ Currently we do not support installation via pip or conda. To install and use ou
 
 ## References
 
-- [WILDS experiments](https://github.com/p-lambda/wilds)
+- [WILDS experiments](https://github.com/p-lambda/wilds) Pang Wei Koh*, Shiori Sagawa*, Henrik Marklund, Sang Michael Xie, Marvin Zhang, Akshay Balsubramani, Weihua Hu, Michihiro Yasunaga, Richard Lanas Phillips, Irena Gao, Tony Lee, Etienne David, Ian Stavness, Wei Guo, Berton A. Earnshaw, Imran S. Haque, Sara Beery, Jure Leskovec, Anshul Kundaje, Emma Pierson, Sergey Levine, Chelsea Finn, and Percy Liang. ICML 2021.
+
 - [DOMAINBED experiments](https://github.com/facebookresearch/DomainBed)
