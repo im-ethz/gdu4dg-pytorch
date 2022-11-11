@@ -16,18 +16,19 @@ try:
     import wandb
 except Exception as e:
     pass
-import wilds.wilds as wilds
-from wilds.wilds.common.data_loaders import get_train_loader, get_eval_loader
-from wilds.wilds.common.grouper import CombinatorialGrouper
-from wilds.wilds.datasets.unlabeled.wilds_unlabeled_dataset import WILDSPseudolabeledSubset
+#import wilds.wilds as wilds
+import wilds
+from wilds.common.data_loaders import get_train_loader, get_eval_loader
+from wilds.common.grouper import CombinatorialGrouper
+from wilds.datasets.unlabeled.wilds_unlabeled_dataset import WILDSPseudolabeledSubset
 
-from wilds.examples.utils import set_seed, Logger, BatchLogger, log_config, ParseKwargs, load, initialize_wandb, log_group_data, parse_bool, get_model_prefix, move_to
-from wilds.examples.train import train, evaluate, infer_predictions
-from wilds.examples.algorithms.initializer import initialize_algorithm, infer_d_out
-from wilds.examples.transforms import initialize_transform
-from wilds.examples.models.initializer import initialize_model
-from wilds.examples.configs.utils import populate_defaults
-import wilds.examples.configs.supported as supported
+from examples.utils import set_seed, Logger, BatchLogger, log_config, ParseKwargs, load, initialize_wandb, log_group_data, parse_bool, get_model_prefix, move_to
+from examples.train import train, evaluate, infer_predictions
+from examples.algorithms.initializer import initialize_algorithm, infer_d_out
+from examples.transforms import initialize_transform
+from examples.models.initializer import initialize_model
+from examples.configs.utils import populate_defaults
+import examples.configs.supported as supported
 import torch.multiprocessing
 
 # Necessary for large images of GlobalWheat
@@ -173,7 +174,8 @@ def main():
 
 
 
-    #config = parser.parse_args()
+    config = parser.parse_args()
+    '''
     config = parser.parse_args(['--device', '2',
                                 '--seed', '0',
                                 '--download', 'True',
@@ -183,6 +185,8 @@ def main():
                                 '--root_dir', '../wilds/data',
                                 '--loss_function', 'gdu_loss',
                                 #'--load_featurizer_only', 'True',
+                                '--dataset_kwargs',
+                                'fold=E',
                                 '--loss_kwargs',
                                 'sigma=4',
                                 'lambda_OLS=0.001',
@@ -198,9 +202,10 @@ def main():
                                 'similarity_measure_name=Projected',
                                 'softness_param=2',
                                 'FE=False'])
+    '''
 
     import datetime
-    config.log_dir = f'../wilds/logs/{datetime.date.today()}/{config.dataset}/{"FT" if config.gdu_kwargs["FE"] else "E2E"}_{config.seed}'
+    #config.log_dir = f'../wilds/logs/{datetime.date.today()}/{config.dataset}/{"FT" if config.gdu_kwargs["FE"] else "E2E"}_{config.seed}'
 
     config = populate_defaults(config)
 
@@ -222,7 +227,7 @@ def main():
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
         os.environ["CUDA_VISIBLE_DEVICES"] = device_str
 
-        torch.cuda.set_device(int(device_str))
+        #torch.cuda.set_device(int(device_str))
         config.device = torch.device("cuda")
     else:
         config.use_data_parallel = False
