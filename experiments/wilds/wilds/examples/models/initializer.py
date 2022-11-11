@@ -36,7 +36,7 @@ def initialize_model(config, d_out, is_featurizer=False):
                 name=config.model,
                 d_out=None,
                 **config.model_kwargs)
-            if config.algorithm == 'GDU':
+            if config.algorithm == 'GDU' or config.algorithm == 'Ensemble':
                 #classifier =  nn.Identity(featurizer.d_out, featurizer.d_out)
                 model = featurizer
                 needs_y_gdu_exception = True

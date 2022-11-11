@@ -10,7 +10,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 '''
 
-from ...wilds.common.metrics.all_metrics import (
+from wilds.common.metrics.all_metrics import (
     Accuracy,
     MultiTaskAccuracy,
     MSE,
@@ -49,7 +49,7 @@ process_pseudolabels_functions = {
 
 # see initialize_*() functions for correspondence=
 # See algorithms/initializer.py
-algorithms = ['ERM', 'GDU', 'groupDRO', 'deepCORAL', 'IRM', 'DANN', 'AFN', 'FixMatch', 'PseudoLabel', 'NoisyStudent']
+algorithms = ['ERM', 'GDU', 'Ensemble', 'groupDRO', 'deepCORAL', 'IRM', 'DANN', 'AFN', 'FixMatch', 'PseudoLabel', 'NoisyStudent']
 
 # See transforms.py
 transforms = ['bert', 'image_base', 'image_resize', 'image_resize_and_center_crop', 'poverty',  'rxrx1']

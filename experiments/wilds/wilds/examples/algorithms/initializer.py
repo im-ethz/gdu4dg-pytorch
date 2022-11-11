@@ -1,9 +1,10 @@
 from types import SimpleNamespace
 import torch
 import math
-from ...wilds.common.utils import get_counts
+from wilds.common.utils import get_counts
 from .ERM import ERM
 from .GDU import GDU
+from .Ensemble import Ensemble
 from .AFN import AFN
 from .DANN import DANN
 from .groupDRO import GroupDRO
@@ -36,6 +37,15 @@ def initialize_algorithm(config, datasets, train_grouper, unlabeled_dataset=None
 
     elif config.algorithm == 'GDU':
         algorithm = GDU(
+            config=config,
+            d_out=d_out,
+            grouper=train_grouper,
+            loss=loss,
+            metric=metric,
+            n_train_steps=n_train_steps)
+
+    elif config.algorithm == 'Ensemble':
+        algorithm = Ensemble(
             config=config,
             d_out=d_out,
             grouper=train_grouper,
