@@ -45,7 +45,11 @@ urls_for_fe = {('rxrx1',0): 'https://worksheets.codalab.org/rest/bundles/0x7d338
                ('globalwheat',2): 'https://worksheets.codalab.org/rest/bundles/0x59af821e2af14473aeb8b03a35a2f75c/contents/blob/globalwheat_seed%3A2_epoch%3Abest_model.pth'}
 
 def fe_loader (config):
-    fe_path = f'./wilds/examples/algorithms/pre_trained_FE/{config.dataset}/best_model_{config.seed}.pth'
+    if config.dataset == "poverty":
+        fe_path = f'./wilds/examples/algorithms/pre_trained_FE/{config.dataset}/best_model_{config.dataset_kwargs["fold"]}.pth'
+    else:
+        fe_path = f'./wilds/examples/algorithms/pre_trained_FE/{config.dataset}/best_model_{config.seed}.pth'
+
     parent_fe_path = os.path.abspath(os.path.join(fe_path, os.pardir))
 
     if not os.path.exists(parent_fe_path):
