@@ -52,7 +52,7 @@ def initialize_model(config, d_out, is_featurizer=False):
     elif 'bert' in config.model:
         if featurize:
             featurizer = initialize_bert_based_model(config, d_out, featurize)
-            if config.algorithm == 'GDU':
+            if config.algorithm == 'GDU' or config.algorithm == 'Ensemble':
                 classifier = nn.Identity(featurizer.d_out, featurizer.d_out)
                 model = nn.Sequential(featurizer, classifier)
             else:
@@ -66,7 +66,7 @@ def initialize_model(config, d_out, is_featurizer=False):
         if featurize:
             featurizer = ResNet18(num_classes=None, **config.model_kwargs)
 
-            if config.algorithm == 'GDU':
+            if config.algorithm == 'GDU' or config.algorithm == 'Ensemble':
                 classifier = nn.Identity(featurizer.d_out, featurizer.d_out)
                 model = nn.Sequential(featurizer, classifier)
 
@@ -99,7 +99,7 @@ def initialize_model(config, d_out, is_featurizer=False):
             model = GPT2FeaturizerLMHeadLogit.from_pretrained(name)
             model.resize_token_embeddings(len(tokenizer))
             featurizer = model.transformer
-            if config.algorithm == 'GDU':
+            if config.algorithm == 'GDU' or config.algorithm == 'Ensemble':
                 classifier = nn.Identity(featurizer.d_out, featurizer.d_out)
                 model = nn.Sequential(featurizer, classifier)
             else:
