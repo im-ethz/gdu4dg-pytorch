@@ -148,8 +148,8 @@ if __name__ == "__main__":
         description="Domain generalization testbed")
     parser.add_argument("--input_dir", type=str, required=True)
     parser.add_argument("--latex", action="store_true")
-    #args = parser.parse_args(['--input_dir', './results/GDU'])
-    args = parser.parse_args()
+    args = parser.parse_args(['--input_dir', '/local/home/sfoell/GitHub/gdu-pytorch/experiments/domainbed/results/ERM'])
+    #args = parser.parse_args()
 
     results_file = "results.tex" if args.latex else "results.txt"
 

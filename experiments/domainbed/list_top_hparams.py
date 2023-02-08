@@ -117,12 +117,12 @@ if __name__ == "__main__":
     parser.add_argument('--gdu_ft', type=bool, default=False)
     parser.add_argument('--seed', type=int, default=0)
     args = parser.parse_args()
-    #args = parser.parse_args(['--algorithm', 'ERM',
-    #                          '--dataset', 'RotatedMNIST',
-    #                          '--test_env', '2',
-    #                          '--gdu_ft', 'True',
-    #                          '--seed', '0',
-    #                          '--input_dir', './results/sweap'])
+    args = parser.parse_args(['--algorithm', 'ERM',
+                              '--dataset', 'RotatedMNIST',
+                              '--test_env', '2',
+                              '--gdu_ft', 'True',
+                              '--seed', '0',
+                              '--input_dir', '/local/home/sfoell/GitHub/gdu-pytorch/experiments/domainbed/results/mnist_results/results/RotatedMNIST_erm'])
 
     records = reporting.load_records(args.input_dir)
     #print("Total records:", len(records))
@@ -148,6 +148,7 @@ if __name__ == "__main__":
                     for r in hparam_records:
                         assert(r['hparams'] == hparam_records[0]['hparams'])
                     if args.gdu_ft == True and group['trial_seed'] == args.seed and selection_method.name == "training-domain validation set":
+                        print(args.gdu_ft, args.seed, selection_method.name)
                         print(f"best_erm_dir:{hparam_records[0]['args']['output_dir']}")
 
     else:

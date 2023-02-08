@@ -153,17 +153,17 @@ if __name__ == "__main__":
     parser.add_argument('--holdout_fraction', type=float, default=0.2)
     parser.add_argument('--single_test_envs', action='store_true')
     parser.add_argument('--skip_confirmation', action='store_true')
-    args = parser.parse_args()
-    '''
+    #args = parser.parse_args()
+
     args = parser.parse_args(['launch',
-                              '--algorithms', 'GDU-FT-CS',
+                              '--algorithms', 'ERM',
                               '--dataset', 'RotatedMNIST',
                               '--n_hparams', '1',
-                              '--n_trials', '1',
+                              #'--n_trials', '1',
                               '--data_dir', './data',
-                              '--output_dir', './results/GDU_FT',
+                              '--output_dir', './results/RotatedMNIST/ERM',
                               '--command_launcher', 'multi_gpu'])
-    '''
+
     args_list = make_args_list(
         n_trials=args.n_trials,
         dataset_names=args.datasets,

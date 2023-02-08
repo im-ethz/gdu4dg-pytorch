@@ -71,13 +71,16 @@ def get_algorithm_class(algorithm_name):
 def get_pretrained_erm(args):
     import subprocess
 
-    results_dir = "/local/home/sfoell/GitHub/gdu-pytorch/experiments/domainbed/results/ERM" #Specifiy where the sweep ERM results are stored
+    results_dir = "/local/home/sfoell/GitHub/gdu-pytorch/experiments/domainbed/results/mnist_results/results/RotatedMNIST_erm" #Specifiy where the sweep ERM results are stored
 
     specification = f"python -m list_top_hparams --input_dir {results_dir} --algorithm ERM --dataset {args.dataset} " \
                     f"--test_env {args.test_envs[0]} --gdu_ft True --seed {args.hparams_seed}"
+
     proc = subprocess.check_output(specification,shell=True)
     erm_dir = proc.decode("utf-8").split(':')[-1][:-1] + "/model.pkl"
-    print(args.test_envs[0], erm_dir)
+    print(args.test_envs, erm_dir, erm_dir.split("/")[-2])
+    erm_dir = f"/local/home/sfoell/GitHub/gdu-pytorch/experiments/domainbed/results/mnist_results/results/RotatedMNIST_erm/{erm_dir.split('/')[-2]}/model.pkl"
+
     return erm_dir
 
 class Algorithm(torch.nn.Module):
