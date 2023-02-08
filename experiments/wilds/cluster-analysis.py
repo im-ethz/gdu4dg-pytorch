@@ -1,7 +1,3 @@
-'''
-    nohup /local/home/sfoell/anaconda3/envs/gdu/bin/python3.9 -u /local/home/sfoell/GitHub/gdu-pytorch/experiments/wilds/run_wilds.py > /local/home/sfoell/GitHub/gdu-pytorch/experiments/wilds/run_wilds_ensemble_0.log 2>&1 &
-'''
-
 import os
 import time
 import argparse
@@ -11,6 +7,10 @@ import torch.nn as nn
 import torchvision
 import sys
 from collections import defaultdict
+import numpy as np
+
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
 
 try:
     import wandb
@@ -29,10 +29,14 @@ from wilds.examples.models.initializer import initialize_model
 from wilds.examples.configs.utils import populate_defaults
 import wilds.examples.configs.supported as supported
 import torch.multiprocessing
-
+from tqdm import tqdm
 # Necessary for large images of GlobalWheat
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+from sklearn.cluster import KMeans
+from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silhouette_score
+from sklearn.manifold import TSNE
 
 def main():
 
@@ -152,7 +156,7 @@ def main():
     parser.add_argument('--eval_epoch', default=None, type=int, help='If eval_only is set, then eval_epoch allows you to specify evaluating at a particular epoch. By default, it evaluates the best epoch by validation performance.')
 
     # Misc
-    parser.add_argument('--device', type=int, nargs='+', default=[0])
+    parser.add_argument('--device', type=int, nargs='+', default=[1])
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--log_dir', default='./logs')
     parser.add_argument('--log_every', default=50, type=int)
@@ -171,44 +175,65 @@ def main():
     parser.add_argument('--wandb_kwargs', nargs='*', action=ParseKwargs, default={},
                         help='keyword arguments for wandb.init() passed as key1=value1 key2=value2')
 
-    #config = parser.parse_args()
-
+    config = parser.parse_args()
+    '''
     #Sample parameter string parsing
     config = parser.parse_args(['--device', '0',
                                 '--seed', '2',
                                 #'--n_epochs', '10',
-                                #'--dataset_kwargs',
-                                #'fold=E',
+                                '--dataset_kwargs',
+                                'fold=E',
                                 '--download', 'True',
-                                '--dataset', 'fmow',
+                                '--dataset', 'poverty',
                                 '--algorithm', 'GDU',
                                 '--progress_bar', 'True',
                                 '--root_dir', '/local/home/sfoell/GitHub/gdu-pytorch/experiments/wilds/data',
                                 #'--loss_function', 'gdu_loss',
                                 #'--load_featurizer_only', 'True',
-                                '--loss_kwargs',
-                                'sigma=4',
-                                'lambda_OLS=0.001',
-                                'lambda_sparse=0.001',
-                                'lambda_orth=0.001',
-                                'orthogonal_loss=False',
-                                'sparse_coding=True',
-                                '--gdu_kwargs',
-                                'num_gdus=2',
-                                'domain_dim=10',
-                                'kernel_name=RBF',
-                                'sigma=4',
-                                'similarity_measure_name=CS',
-                                'softness_param=2',
-                                'FE=True'
+                                #'--loss_kwargs',
+                                #'sigma=4',
+                                #'lambda_OLS=0',
+                                #'lambda_sparse=0',
+                                #'lambda_orth=0',
+                                #'orthogonal_loss=False',
+                                #'sparse_coding=False',
+                                #'--gdu_kwargs',
+                                #'num_gdus=5',
+                                #'domain_dim=10',
+                                #'kernel_name=RBF',
+                                #'sigma=4',
+                                #'similarity_measure_name=CS',
+                                #'softness_param=2',
+                                #'FE=True'
                                 ])
-
+    '''
     import datetime
     #config.log_dir = f'../wilds/logs/{datetime.date.today()}/{config.dataset}/{"FT" if config.gdu_kwargs["FE"] else "E2E"}_{config.seed}'
-    config.log_dir = f'./wilds/logs/{datetime.date.today()}/{config.dataset}/{config.algorithm}/{config.gdu_kwargs["num_gdus"]}/{config.seed}'
-    #config.log_dir = f'/local/home/sfoell/GitHub/gdu-pytorch/experiments/wilds/wilds/logs/2023-01-19/came/GDU/7/{config.seed}'
+
+
+    config.log_dir = f'./wilds/logs/{datetime.date.today()}/{config.dataset}/{config.algorithm}'
+
+    config.algorithm = f'GDU'
+    config.root_dir = '/local/home/sfoell/GitHub/gdu-pytorch/experiments/wilds/data'
+
+    config.loss_kwargs['sigma'] = 4
+    config.loss_kwargs['lambda_OLS'] = 0.001
+    config.loss_kwargs['lambda_sparse'] = 0.001
+    config.loss_kwargs['lambda_orth'] = 0.001
+    config.loss_kwargs['orthogonal_loss'] = "False"
+    config.loss_kwargs['sparse_coding'] = "True"
+
+    config.gdu_kwargs['sigma'] = 4
+    config.gdu_kwargs['softness_param'] = 2
+    config.gdu_kwargs['similarity_measure_name'] = "CS"
+    config.gdu_kwargs['num_gdus'] = 5
+    config.gdu_kwargs['domain_dim'] = 10
+    config.gdu_kwargs['kernel_name'] = "RBF"
+    config.gdu_kwargs['FE'] = True
+
 
     config = populate_defaults(config)
+
 
     # For the GlobalWheat detection dataset,
     # we need to change the multiprocessing strategy or there will be
@@ -448,95 +473,44 @@ def main():
         train_grouper=train_grouper,
         unlabeled_dataset=unlabeled_dataset,
     )
+    i = 0
+    for inputs, target, metadata in tqdm(datasets['train']['loader'], position=0, leave=True):
+        inputs, target = inputs.to(config.device), target.to(config.device)
+        if i == 0:
+            output = algorithm.model.feature_extractor(inputs)
+            output.to(config.device)
+            i+=1
 
-    model_prefix = get_model_prefix(datasets['train'], config)
-    if not config.eval_only:
-        # Resume from most recent model in log_dir
-        resume_success = False
-        if resume:
-            save_path = model_prefix + 'epoch:last_model.pth'
-            if not os.path.exists(save_path):
-                epochs = [
-                    int(file.split('epoch:')[1].split('_')[0])
-                    for file in os.listdir(config.log_dir) if file.endswith('.pth')]
-                if len(epochs) > 0:
-                    latest_epoch = max(epochs)
-                    save_path = model_prefix + f'epoch:{latest_epoch}_model.pth'
-            try:
-                prev_epoch, best_val_metric = load(algorithm, save_path, device=config.device)
-                epoch_offset = prev_epoch + 1
-                logger.write(f'Resuming from epoch {epoch_offset} with best val metric {best_val_metric}')
-                resume_success = True
-            except FileNotFoundError:
-                pass
-        if resume_success == False:
-            epoch_offset=0
-            best_val_metric=None
+        #elif i>0 and i <15:
 
-        # Log effective batch size
-        if config.gradient_accumulation_steps > 1:
-            logger.write(
-                (f'\nUsing gradient_accumulation_steps {config.gradient_accumulation_steps} means that')
-                + (f' the effective labeled batch size is {config.batch_size * config.gradient_accumulation_steps}')
-                + (f' and the effective unlabeled batch size is {config.unlabeled_batch_size * config.gradient_accumulation_steps}'
-                   if unlabeled_dataset and config.unlabeled_batch_size else '')
-                + ('. Updates behave as if torch loaders have drop_last=False\n')
-            )
-        print('begin training')
-        train(
-            algorithm=algorithm,
-            datasets=datasets,
-            general_logger=logger,
-            config=config,
-            epoch_offset=epoch_offset,
-            best_val_metric=best_val_metric,
-            unlabeled_dataset=unlabeled_dataset,
-        )
-    else:
-        if config.eval_epoch is None:
-            eval_model_path = model_prefix + 'epoch:best_model.pth'
+        tmp = algorithm.model.feature_extractor(inputs)
+        tmp.to(config.device)
+
+        output = torch.cat((output, tmp), 0)
+        output.to(config.device)
+        i+=1
+
+
+
+    X = pd.DataFrame(output.cpu().numpy()).sample(frac=0.2, random_state = config.seed)
+    cluster_scores = pd.DataFrame(columns = ["calinski_harabasz_score", "davies_bouldin_score", "silhouette_score"], index = list(range(2, 26)))
+    tsne = TSNE(n_components = 2, random_state=config.seed)
+    tsne_results = tsne.fit_transform(X.values)
+    #tsne_results=X.values
+    for n_clusters in tqdm(list(range(2, 26))):
+        kmeans = KMeans(n_clusters=n_clusters, random_state=config.seed).fit(tsne_results)
+        #kmeans = KernelKMeans(n_clusters=n_clusters, max_iter=100, random_state=0, verbose=1).fit(tsne_results)
+        cluster_scores.at[n_clusters, "calinski_harabasz_score"] = np.round(calinski_harabasz_score(tsne_results, kmeans.labels_), 4)
+        cluster_scores.at[n_clusters, "davies_bouldin_score"] = np.round(davies_bouldin_score(tsne_results, kmeans.labels_), 4)
+        cluster_scores.at[n_clusters, "silhouette_score"] = np.round(silhouette_score(tsne_results, kmeans.labels_), 4)
+        if config.dataset == "poverty":
+            cluster_scores.to_csv(config.log_dir + f'cluster-scores{config.dataset_kwargs["fold"]}.csv')
         else:
-            eval_model_path = model_prefix +  f'epoch:{config.eval_epoch}_model.pth'
-        best_epoch, best_val_metric = load(algorithm, eval_model_path, device=config.device)
-        if config.eval_epoch is None:
-            epoch = best_epoch
-        else:
-            epoch = config.eval_epoch
-        if epoch == best_epoch:
-            is_best = True
-        evaluate(
-            algorithm=algorithm,
-            datasets=datasets,
-            epoch=epoch,
-            general_logger=logger,
-            config=config,
-            is_best=is_best)
+            cluster_scores.to_csv(config.log_dir+f'cluster-scores{config.seed}.csv')
 
-    if config.use_wandb:
-        wandb.finish()
-    logger.close()
-    for split in datasets:
-        datasets[split]['eval_logger'].close()
-        datasets[split]['algo_logger'].close()
+
+
 
 if __name__=='__main__':
-    '''
-    sweep_configuration = {
-        'method': 'random',
-        'name': 'test_sweep',
-        'metric': {
-            'goal': 'maximize',
-            'name': 'val_eval/r_wg'
-        },
-        'parameters': {
-            'sigma': {'values': [4, 8, 16]},
-            'num_gdus': {'values': [5, 10, 15]},
-            }
-    }
-
-    sweep_id = wandb.sweep(sweep=sweep_configuration, project='test_sweep')
-
-    wandb.agent(sweep_id, function=main, count=4)
-    '''
 
     main()

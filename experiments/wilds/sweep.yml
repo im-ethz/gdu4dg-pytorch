@@ -1,0 +1,11 @@
+program: run_wilds.py
+name: gdu-wilds
+method: grid
+metric:
+  name: val_eval/r_wg
+  goal: maximize
+parameters:
+  sigma:
+    values: [4, 8]
+  num_gdus:
+    values: [5, 10]

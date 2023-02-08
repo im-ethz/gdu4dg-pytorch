@@ -79,7 +79,7 @@ def initialize_model(config, d_out, is_featurizer=False):
     elif config.model == 'gin-virtual':
         from ..models.gnn import GINVirtual
         if featurize:
-            if config.algorithm == 'GDU':
+            if config.algorithm == 'GDU' or config.algorithm == "Ensemble":
                 featurizer = GINVirtual(num_tasks=None, **config.model_kwargs)
                 classifier = nn.Identity(featurizer.d_out, d_out)
                 model = nn.Sequential(featurizer, classifier)

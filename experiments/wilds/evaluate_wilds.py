@@ -298,9 +298,10 @@ if __name__ == "__main__":
 
     # Parse args and run this script
     #args = parser.parse_args()
-
-    args = parser.parse_args(['--predictions_dir', '../wilds/logs/2022-08-09/fmow/FMOW_EVAL',
-                              '--output_dir', '../wilds/evaluation',
-                              '--dataset', 'fmow', '--root_dir', '../wilds/data'])
+    #dir = "/Users/sfoell/Desktop/Rebut^tal/Experiments/Ensemble/Alina/final/civilcomments/FT"
+    dir = "/local/home/sfoell/GitHub/gdu-pytorch/experiments/wilds/wilds/logs/2023-01-22/fmow/GDU/2"
+    args = parser.parse_args(['--predictions_dir', dir,
+                              '--output_dir', dir,
+                              '--dataset', 'fmow', '--root_dir', "/local/home/sfoell/GitHub/gdu-pytorch/experiments/wilds/data"])
 
     main()

@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 import torch
 import math
-from wilds.common.utils import get_counts
+from ...wilds.common.utils import get_counts
 from .ERM import ERM
 from .GDU import GDU
 from .Ensemble import Ensemble

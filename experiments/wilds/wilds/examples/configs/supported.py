@@ -10,7 +10,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 '''
 
-from wilds.common.metrics.all_metrics import (
+from ...wilds.common.metrics.all_metrics import (
     Accuracy,
     MultiTaskAccuracy,
     MSE,
