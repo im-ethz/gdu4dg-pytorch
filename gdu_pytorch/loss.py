@@ -26,6 +26,7 @@ class LayerLoss(nn.Module):
 
     def forward(self, output, target, model):
         feature_vector = model.x_tilde
+        print(model.num_gdus)
         domain_bases = {i: model.gdu_layer.gdus[f'GDU_{i}'].domain_basis for i in range(model.num_gdus)}
         weight_matrix = model.gdu_layer.betas
 

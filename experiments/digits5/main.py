@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.model_selection import ParameterGrid
 from torch.utils.data import DataLoader
 from torch import nn
-from torchmetrics import ConfusionMatrix, Accuracy, Precision, Recall, Specificity, PrecisionRecallCurve, AUC, AUROC
+from torchmetrics import ConfusionMatrix, Accuracy, Precision, Recall, Specificity, PrecisionRecallCurve, AUROC
 import traceback
 import copy
 from tqdm import tqdm
@@ -23,7 +23,7 @@ def digits_classification(data_dir,
                           TARGET_DOMAIN,
                           SOURCE_SAMPLE_SIZE,
                           TARGET_SAMPLE_SIZE,
-                          similarity = 'CS',
+                          similarity = 'MMD',
                           single_best = False,
                           single_source_domain = None,
                           batch_size = 128,
@@ -126,19 +126,28 @@ def digits_classification(data_dir,
 
         # training
         model.train()
+        test_counter = 0
         for inputs, target in source_train_loader:
             inputs, target = inputs.to(device), target.to(device)
 
+
+            model = model.to(device)
+            optimiser = torch.optim.Adam(model.parameters(), lr=lr)
+            #if test_counter==20:
+            #    print("test")
+            #    model.num_gdus = 6
             optimiser.zero_grad()
 
             output = model(inputs)
+            #print(model.num_gdus)
             loss = layer_criterion(output, target, model)
+
 
             batch_logs['source_train'].append(loss.item())
 
             loss.backward()
             optimiser.step()
-
+            test_counter += 1
         optimiser.zero_grad()
 
         # validation
@@ -160,7 +169,7 @@ def digits_classification(data_dir,
 
                 batch_logs['target_test'].append(loss.item())
                 batch_logs_cgm['test']['loss'].append(loss.item())
-                batch_logs_cgm['test']['accuracy'].append(metrics['accuracy'](output, target))
+                #batch_logs_cgm['test']['accuracy'].append(metrics['accuracy'](output, target))
                 batch_logs_cgm['test']['cross_entropy'].append(metrics['cross_entropy'](output, target).item())
 
         current_test_accuracy = np.mean(batch_logs_cgm['test']['accuracy'])

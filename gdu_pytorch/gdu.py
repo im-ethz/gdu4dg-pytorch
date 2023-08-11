@@ -49,12 +49,41 @@ class GDULayer(nn.Module):
         self.kernel_softmax = torch.nn.Softmax(dim=1)
         self.betas = None
         self.output_dim = 1 if task == 'classification' else 2
+        self.test_counter = 0
 
     def forward(self, x_tilde):
         self.betas = torch.zeros(x_tilde.size(0), self.num_gdus).to(self.device)                                # betas: (batch_size, num_gdus)
         y_tildes = torch.zeros(x_tilde.size(0), self.num_gdus, self.output_size, self.output_dim).to(self.device)
         weighted_predictions = torch.zeros(x_tilde.size(0), self.num_gdus, self.output_size, self.output_dim).to(self.device)
 
+        print(self.test_counter)
+
+        if self.test_counter == 20:
+
+
+            self.num_gdus +=1
+            print(self.num_gdus)
+
+            self.gdus.update({f'GDU_{self.num_gdus-1}': GDU(self.device, self.num_gdus,
+                                                          self.domain_dim,
+                                                          self.feature_vector_size,
+                                                          self.kernel_name,
+                                                          self.sigma,
+                                                          self.similarity_measure_name,
+                                                          self.softness_param).to(self.device)})
+
+            self.learning_machines.update({f'learning_machine_{self.num_gdus-1}': LearningMachine(self.device,
+                                                                                                self.feature_vector_size,
+                                                                                                self.output_size,
+                                                                                                task=self.task).to(self.device)})
+            self.betas = torch.cat((self.betas, torch.zeros(x_tilde.size(0), 1).to(self.device)), 1)
+            y_tildes = torch.zeros(x_tilde.size(0), self.num_gdus, self.output_size, self.output_dim).to(self.device)
+            weighted_predictions = torch.zeros(x_tilde.size(0), self.num_gdus, self.output_size, self.output_dim).to(self.device)
+
+        if self.test_counter >=20:
+            print(self.learning_machines[f'learning_machine_{0}'].linear.weight[0][0])
+            print(self.learning_machines[f'learning_machine_{self.num_gdus-1}'].linear.weight[0][0])
+        self.test_counter += 1
         for i in range(self.num_gdus):
             self.betas[:, i] = self.gdus[f'GDU_{i}'](x_tilde)
         if self.similarity_measure_name in ['MMD', 'CS']:

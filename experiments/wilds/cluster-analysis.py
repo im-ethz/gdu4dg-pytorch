@@ -38,6 +38,8 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silhouette_score
 from sklearn.manifold import TSNE
 
+import matplotlib.pyplot as plt
+
 def main():
 
     ''' Arg defaults are filled in according to examples/configs/ '''
@@ -175,16 +177,16 @@ def main():
     parser.add_argument('--wandb_kwargs', nargs='*', action=ParseKwargs, default={},
                         help='keyword arguments for wandb.init() passed as key1=value1 key2=value2')
 
-    config = parser.parse_args()
-    '''
+    #config = parser.parse_args()
+
     #Sample parameter string parsing
     config = parser.parse_args(['--device', '0',
                                 '--seed', '2',
                                 #'--n_epochs', '10',
                                 '--dataset_kwargs',
-                                'fold=E',
+                                #'fold=E',
                                 '--download', 'True',
-                                '--dataset', 'poverty',
+                                '--dataset', 'camelyon17',
                                 '--algorithm', 'GDU',
                                 '--progress_bar', 'True',
                                 '--root_dir', '/local/home/sfoell/GitHub/gdu-pytorch/experiments/wilds/data',
@@ -206,7 +208,7 @@ def main():
                                 #'softness_param=2',
                                 #'FE=True'
                                 ])
-    '''
+
     import datetime
     #config.log_dir = f'../wilds/logs/{datetime.date.today()}/{config.dataset}/{"FT" if config.gdu_kwargs["FE"] else "E2E"}_{config.seed}'
 
@@ -474,25 +476,48 @@ def main():
         unlabeled_dataset=unlabeled_dataset,
     )
     i = 0
-    for inputs, target, metadata in tqdm(datasets['train']['loader'], position=0, leave=True):
+
+
+
+
+    for inputs, target, metadata in tqdm(datasets['test']['loader'], position=0, leave=True):
         inputs, target = inputs.to(config.device), target.to(config.device)
+
         if i == 0:
             output = algorithm.model.feature_extractor(inputs)
             output.to(config.device)
+            all_meta = metadata
+            all_input = inputs
             i+=1
-
-        #elif i>0 and i <15:
 
         tmp = algorithm.model.feature_extractor(inputs)
         tmp.to(config.device)
-
         output = torch.cat((output, tmp), 0)
+        all_meta = torch.cat((all_meta, metadata), 0)
+        all_input = torch.cat((all_input, inputs), 0)
         output.to(config.device)
         i+=1
 
+        if i > 25:
+            break
 
 
-    X = pd.DataFrame(output.cpu().numpy()).sample(frac=0.2, random_state = config.seed)
+        kmeans = KMeans(n_clusters=3, random_state=config.seed).fit(output.cpu().numpy())
+
+        for t in range(output.shape[0]):
+            image = all_input[t].cpu()
+            hospital = all_meta[t].numpy()[0]
+            c_label= "test"#kmeans.labels_[t]
+            plt.imshow(image.permute(1, 2, 0))
+
+            plt.savefig(f"/local/home/sfoell/GDU_Test/motivation/hospital_{hospital}_cluster_{c_label}_{t}.pdf")
+            plt.show()
+
+
+
+
+
+
     cluster_scores = pd.DataFrame(columns = ["calinski_harabasz_score", "davies_bouldin_score", "silhouette_score"], index = list(range(2, 26)))
     tsne = TSNE(n_components = 2, random_state=config.seed)
     tsne_results = tsne.fit_transform(X.values)

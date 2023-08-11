@@ -70,9 +70,9 @@ args = parse_args()
 if socket.gethostname() == 'mtec-mis-502':
     args.data_dir = '/mnt/wave/odin/digitfive/'
     args.save_dir = '/local/home/evanweenen/gdu4dg-pytorch/results/digits5/'
-elif socket.gethostname() == 'mtec-im-gpu01' and os.getlogin() == 'ansass':
+elif socket.gethostname() == 'mtec-im-gpu01' and os.getlogin() == 'sfoell':
     args.data_dir = '/wave/odin/digitfive/'
-    args.save_dir = '/local/home/ansass/Thesis/layer/results/digits5/'
+    args.save_dir = '/local/home/sfoell/GDU_Test/'
 else:
     print("You are running the code on an undefined machine. Please add your machine and data paths to config.py")
 
