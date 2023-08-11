@@ -11,3 +11,12 @@ __pycache__/
 /experiments/domainbed/domainbed/misc/
 /experiments/domainbed/domainbed/results/2020_10_06_7df6f06/
 
+/experiments/wilds/data/iwildcam_v2.0/
+/experiments/domainbed/results/mnist_results/
+/experiments/wilds/evaluation/E2E-CS/
+/experiments/wilds/evaluation/E2E-MMD/
+/experiments/wilds/evaluation/E2E-PRO/
+/experiments/wilds/evaluation/FT-CS/
+/experiments/wilds/evaluation/FT-MMD/
+/experiments/wilds/evaluation/FT-PRO/
+/experiments/wilds/evaluation/Simon/
