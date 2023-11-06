@@ -48,7 +48,25 @@ This repository uses code from the following references. Please see their licenc
 
 - [WILDS experiments](https://github.com/p-lambda/wilds) Koh PW, Sagawa S, Marklund H, et al. WILDS: A Benchmark of in-the-Wild Distribution Shifts. In: Meila M, Zhang T, eds. Proceedings of the 38th International Conference on Machine Learning. Vol 139. PMLR; 2021:5637--5664. https://proceedings.mlr.press/v139/koh21a.html
 
+  MIT License
+  
+  Copyright (c) 2020 WILDS team
+  
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included   in all copies or substantial portions of the Software.
+
 - [DOMAINBED experiments](https://github.com/facebookresearch/DomainBed) Gulrajani I, Lopez-Paz D. In Search of Lost Domain Generalization. arXiv:200701434 [cs, stat]. Published online July 2, 2020. http://arxiv.org/abs/2007.01434
+
+  The MIT License
+  
+  Copyright (c) Facebook, Inc. and its affiliates.
+  
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files   (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify,       merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is          furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+  
 
 
 # Citation
